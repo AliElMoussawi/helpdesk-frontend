@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "name": "Andras Meadows",
+    "group": {
+      "group_id": 1,
+      "group_name": "Bald Ducks"
+    }
+  },
+  {
+    "id": 2,
+    "name": "Hedvig Melvin",
+    "group": {
+      "group_id": 1,
+      "group_name": "Bald Ducks"
+    }
+  },
+  {
+    "id": 3,
+    "name": "Prudy Leyes",
+    "group": {
+      "group_id": 2,
+      "group_name": "Weak Titans"
+    }
+  }
+]
