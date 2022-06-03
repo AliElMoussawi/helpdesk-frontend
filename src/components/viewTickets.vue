@@ -31,26 +31,44 @@
         </CollapseTransition>
         <div class="table-container">
             <div id="top-right-elements">
-                <button class="button-39" role="button" v-show="this.ticketIdsSelected.length == 0">Play</button>
+                <button class="button-39" role="button"
+                    v-show="this.ticketIdsSelected.length == 0 && (this.currentTab != 'Deleted tickets' && this.currentTab != 'Suspended tickets')">Play</button>
                 <button class="button-39" id="clear-selection" v-show="this.ticketIdsSelected.length != 0"
                     v-on:click="clearSelection()">Clear
                     selection</button>
                 <button @click="$refs.modalName.openModal()" class="button-39" id="edit-ticket"
-                    v-show="this.ticketIdsSelected.length != 0">Edit
+                    v-show="this.ticketIdsSelected.length != 0 && this.currentTab != 'Deleted tickets'">Edit
                     ticket</button>
 
                 <Popper>
-                    <button class="button-39" id="menu-selected" v-show="this.ticketIdsSelected.length != 0">˅</button>
+                    <button class="button-39" id="menu-selected"
+                        v-show="this.ticketIdsSelected.length != 0 && this.currentTab != 'Deleted tickets'">˅</button>
                     <template #content>
                         <div id="popcontent-menu-edit">
                             <div class="menu-component">Merge tickets into another ticket</div>
-                            <div class="menu-component">Delete</div>
-                            <div class="menu-component">Mark as spam</div>
+                            <div @click="showModal = true" class="menu-component">Delete</div>
+                            <div class="menu-component" @click="showModalSpam = true">Mark as spam</div>
+                        </div>
+                    </template>
+                </Popper>
+                <button class="button-39" id="restore-ticket"
+                    v-show="this.ticketIdsSelected.length != 0 && this.currentTab == 'Deleted tickets'">Restore
+                    {{ this.ticketIdsSelected.length }} ticket(s)</button>
+
+                <Popper>
+                    <button class="button-39" id="menu-selected2"
+                        v-show="this.ticketIdsSelected.length != 0 && this.currentTab == 'Deleted tickets'">˅</button>
+                    <template #content>
+                        <div id="popcontent-menu-edit2">
+                            <div class="menu-component">Delete {{ this.ticketIdsSelected.length }} ticket(s) forever
+                            </div>
+                            <div class="menu-component">Restore {{ this.ticketIdsSelected.length }} ticket(s)</div>
                         </div>
                     </template>
                 </Popper>
                 <Popper>
-                    <button class="button-39" id="down-menu">˅</button>
+                    <button class="button-39" id="down-menu"
+                        v-show="this.currentTab != 'Deleted tickets' && this.currentTab != 'Suspended tickets'">˅</button>
                     <template #content>
                         <div id="popcontent-menu">
                             <div class="menu-component" id="CSV">Export as CSV</div>
@@ -122,7 +140,7 @@
                                 :value="ticket.id" /></td>
                         <td v-show="checkExists('ID')">{{ ticket.id }}</td>
 
-                        <td v-show="checkExists('Subject')" style="position: relative;" id="pop">
+                        <td v-show="checkExists('Subject')" id="pop">
                             <Popper hover>
                                 {{ ticket.subject }}
                                 <template #content>
@@ -168,51 +186,111 @@
                     <div class="macro">
                         <span class="text-modal">Assignee*</span>
                         <br />
-                        <span class="text-modal">take it</span>
+                        <span class="text-modal" id="link-style"
+                            @click="changeAssignee(this.getGroup(this.currentUserID) + '/' + this.getUserName(this.currentUserID))">take
+                            it</span>
                         <br />
-                        <select>
-                            <option value="no-change">- No Change -</option>
-                        </select>
+                        <div class="dropdown-1">
+                            <button class="dropbtn-1" @click="toggleAssigneePanel()">{{
+                                    this.chosenAssignee
+                            }} <span class="down-arrow">⯆</span></button>
+                            <div class="dropdown-content-1" v-show="assigneeClicked === true">
+                                <a @click="changeAssignee('- No Change -')">- No Change -</a>
+                                <a @click="groupClicked === false ? groupClicked = true : groupClicked = false"><svg
+                                        id="groupOfPeople" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                        fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
+                                        <path
+                                            d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+                                        <path fill-rule="evenodd"
+                                            d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z" />
+                                        <path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
+                                    </svg>{{ this.getGroup(this.currentUserID) }} <svg id="expand-arrow"
+                                        class="svg-icon" viewBox="0 0 20 20">
+                                        <path fill="none"
+                                            d="M14.989,9.491L6.071,0.537C5.78,0.246,5.308,0.244,5.017,0.535c-0.294,0.29-0.294,0.763-0.003,1.054l8.394,8.428L5.014,18.41c-0.291,0.291-0.291,0.763,0,1.054c0.146,0.146,0.335,0.218,0.527,0.218c0.19,0,0.382-0.073,0.527-0.218l8.918-8.919C15.277,10.254,15.277,9.784,14.989,9.491z">
+                                        </path>
+                                    </svg></a>
+                            </div>
+                            <div class="dropdown-content-1" v-show="groupClicked === true">
+                                <a @click="groupClicked = false">Back</a>
+                                <a @click="changeAssignee(this.getGroup(this.currentUserID))"><svg
+                                        style="margin-right: 5px;" xmlns="http://www.w3.org/2000/svg" width="16"
+                                        height="16" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
+                                        <path
+                                            d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+                                        <path fill-rule="evenodd"
+                                            d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z" />
+                                        <path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
+                                    </svg>{{ this.getGroup(this.currentUserID) }}</a>
+                                <template v-for="user in getCurrentGroupUsers(this.getGroup(this.currentUserID))"
+                                    :key="user.id">
+                                    <a @click="changeAssignee(this.getGroup(user.id) + '/' + user.name)"> <svg
+                                            style="margin-right: 5px;" xmlns="http://www.w3.org/2000/svg" width="16"
+                                            height="16" fill="currentColor" class="bi bi-person-fill"
+                                            viewBox="0 0 16 16">
+                                            <path
+                                                d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+                                        </svg>{{ user.name }}</a>
+                                </template>
+                            </div>
+                        </div>
                         <br />
                         <br />
-                        Add Tags
+                        <span class="text-modal">Add Tags</span>
                         <br />
-                        <vue3-tags-input :tags="tags" placeholder="input tags" />
+                        <vue3-tags-input :tags="tagsToAdd" placeholder="input tags"
+                            @on-tags-changed="handleChangeTagAdd" />
                         <br />
-                        Remove Tags
+                        <span class="text-modal">Remove Tags</span>
                         <br />
-                        <vue3-tags-input :tags="tags" placeholder="input tags" />
-                        <br />
+                        <vue3-tags-input :tags="tagsToRemove" placeholder="input tags"
+                            @on-tags-changed="handleChangeTagRemove" />
                         <br />
                         <div class="float-container-popup">
                             <div class="type">
                                 <span class="text-modal">Type</span>
                                 <br />
-                                <select>
-                                    <option value="no-change">- No Change -</option>
-                                    <option value="question">Question</option>
-                                    <option value="incident">Incident</option>
-                                    <option value="problem">Problem</option>
-                                    <option value="task">Task</option>
-                                </select>
+                                <div class="dropdown">
+                                    <button class="dropbtn"
+                                        @click="typeClicked === false ? typeClicked = true : typeClicked = false">{{
+                                                this.chosenType
+                                        }} <span class="down-arrow">⯆</span></button>
+                                    <div class="dropdown-content" v-show="typeClicked === true">
+                                        <a @click="changeType('- No Change -')">- No Change -</a>
+                                        <a @click="changeType('Question')">Question</a>
+                                        <a @click="changeType('Incident')">Incident</a>
+                                        <a @click="changeType('Problem')">Problem</a>
+                                        <a @click="changeType('Task')">Task</a>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
+                            <div class="type" id="priority-choose">
                                 <span class="text-modal">Priority</span>
                                 <br />
-                                <select>
-                                    <option value="no-change">- No Change -</option>
-                                    <option value="low">Low</option>
-                                    <option value="normal">Normal</option>
-                                    <option value="high">High</option>
-                                    <option value="urgent">Urgent</option>
-                                </select>
+                                <div class="dropdown">
+                                    <button class="dropbtn"
+                                        @click="priorityClicked === false ? priorityClicked = true : priorityClicked = false">{{
+                                                this.chosenPriority
+                                        }} <span class="down-arrow">⯆</span></button>
+                                    <div class="dropdown-content" v-show="priorityClicked === true">
+                                        <a @click="changePriority('- No Change -')">- No Change -</a>
+                                        <a @click="changePriority('Low')">Low</a>
+                                        <a @click="changePriority('Normal')">Normal</a>
+                                        <a @click="changePriority('High')">High</a>
+                                        <a @click="changePriority('Urgent')">Urgent</a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        <br v-show="chosenType=='Task'"/>
+                        <span class="text-modal" v-show="chosenType=='Task'">Due Date</span>
+                        <Datepicker v-model="date" :enableTimePicker="false" weekStart="0" :format="format"
+                            :previewFormat="format" placeholder="Select date" :textInputOptions="textInputOptions"
+                            textInput v-show="chosenType=='Task'"/>
                     </div>
                 </div>
                 <div class="float-child-2">
                     <label for="subject">Subject</label>
-                    <br />
                     <input type="text" id="subject" name="subject" value="- No Change -">
                     <br />
                     <EmojiPicker picker-type="textarea" @select="onSelectEmoji" />
@@ -228,17 +306,47 @@
             </div>
         </template>
     </ModalItem>
+
+    <VueModal v-model="showModal" title="Delete Tickets">
+        <p>If you need to restore them, go to Deleted tickets.</p>
+        <br />
+        <div>
+            <button class="button-39" id="deleteButton">Delete tickets</button>
+            <button class="button-39" id="cancelButton" @click="showModal = false">Cancel</button>
+        </div>
+        <br />
+        <br />
+        <br />
+    </VueModal>
+
+    <VueModal v-model="showModalSpam" title="Mark tickets as spam">
+        <p>This will delete the tickets and block the requesters.</p>
+        <br />
+        <div>
+            <button class="button-39" id="spamButton">Mark as spam</button>
+            <button class="button-39" id="cancelButtonSpam" @click="showModalSpam = false">Cancel</button>
+        </div>
+        <br />
+        <br />
+        <br />
+    </VueModal>
 </template>
 
 <script>
 import usersData from '../assets/users_data.json';
 import ticketsData from '../assets/tickets_data.json';
+import groupsData from '../assets/groups_data.json';
 import Popper from "vue3-popper";
 import ModalItem from "./Modal.vue";
 import CollapseTransition from "./CollapseTransition.vue";
 import EmojiPicker from 'vue3-emoji-picker';
 import '../assets/emojipickerstyle.css'
 import Vue3TagsInput from 'vue3-tags-input';
+import VueModal from '@kouts/vue-modal';
+import '@kouts/vue-modal/dist/vue-modal.css';
+import { ref } from 'vue';
+import Datepicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
 export default {
     name: 'ViewTicket',
     components: {
@@ -247,17 +355,29 @@ export default {
         CollapseTransition,
         EmojiPicker,
         Vue3TagsInput,
+        VueModal,
+        Datepicker
     },
     data() {
         return {
-            tags: [],
+            showModalSpam: false,
+            showModal: false, //for the deleteTicket
+            groupClicked: false,
+            chosenAssignee: "- No Change -",
+            assigneeClicked: false,
+            typeClicked: false,
+            priorityClicked: false,
+            chosenPriority: "- No Change -",
+            chosenType: "- No Change -",
+            tagsToAdd: [],
+            tagsToRemove: [],
             isOpen: true, // for collapsing the views panel
             ascending: false,
             sortColumn: '',
             currentUserID: 1,
-            currentUserGroup: "Bald Ducks",
             users: [],
             tickets: [],
+            groups: [],
             load: false,
             currentTab: "Your unsolved tickets",
             ticketIdsSelected: [],
@@ -307,6 +427,35 @@ export default {
         }
     },
     methods: {
+        handleChangeTagAdd(tags) {
+            this.tagsToAdd = tags;
+        },
+        handleChangeTagRemove(tags) {
+            this.tagsToRemove = tags;
+        },
+        toggleAssigneePanel() {
+            this.assigneeClicked === false ? this.assigneeClicked = true : this.assigneeClicked = false;
+            this.groupClicked = false;
+        },
+        changeAssignee(newAssignee) {
+            this.assigneeClicked === false ? this.assigneeClicked = true : this.assigneeClicked = false;
+            this.chosenAssignee = newAssignee;
+            this.assigneeClicked = false;
+            this.groupClicked = false;
+            console.log(this.tagsToAdd);
+            console.log(this.tagsToRemove);
+        },
+        getUserName(id) {
+            return this.users.find(u => u.id === id).name;
+        },
+        changePriority(newPriority) {
+            this.priorityClicked === false ? this.priorityClicked = true : this.priorityClicked = false;
+            this.chosenPriority = newPriority;
+        },
+        changeType(newType) {
+            this.typeClicked === false ? this.typeClicked = true : this.typeClicked = false;
+            this.chosenType = newType;
+        },
         selectAll() {
             this.ticketIdsSelected = [];
 
@@ -357,11 +506,15 @@ export default {
         getData() {
             setTimeout(function () { this.users = usersData; }.bind(this), 3000);
             setTimeout(function () { this.tickets = ticketsData; }.bind(this), 3000);
+            setTimeout(function () { this.groups = groupsData; }.bind(this), 3000);
             setTimeout(function () { this.load = true; }.bind(this), 10);
             setTimeout(function () { this.load = false; }.bind(this), 3000);
         },
+        getCurrentGroupUsers(groupName) {
+            return this.groups.find(g => g.name == groupName).users;
+        },
         getGroup(id) {
-            return this.users.find(u => u.id === id).group.group_name
+            return this.users.find(u => u.id === id).group.group_name;
         },
         getDate(timestamp) {
             var ts = new Date(timestamp);
@@ -427,7 +580,7 @@ export default {
                 let currentMonth = new Date().getMonth();
                 for (let i = 0; i < this.tickets.length; i++) {
                     let requestedDate = new Date(this.tickets[i].requested);
-                    if (requestedDate.getFullYear() == currentYear && requestedDate.getMonth() == currentMonth && this.getGroup(this.tickets[i].assignee.assignee_id) == this.currentUserGroup)
+                    if (requestedDate.getFullYear() == currentYear && requestedDate.getMonth() == currentMonth && this.getGroup(this.tickets[i].assignee.assignee_id) == this.getGroup(this.currentUserID))
                         respectiveRows.push(this.tickets[i]);
                 }
                 return respectiveRows
@@ -447,7 +600,7 @@ export default {
             } else if (tabName == 'Unsolved tickets in your groups') {
                 let respectiveRows = [];
                 for (let i = 0; i < this.tickets.length; i++) {
-                    if (this.tickets[i].status == "unsolved" && this.getGroup(this.tickets[i].assignee.assignee_id) == this.currentUserGroup)
+                    if (this.tickets[i].status == "unsolved" && this.getGroup(this.tickets[i].assignee.assignee_id) == this.getGroup(this.currentUserID))
                         respectiveRows.push(this.tickets[i]);
                 }
                 return respectiveRows
@@ -470,6 +623,27 @@ export default {
     },
     created: function () {
         this.getData();
+    },
+    setup() {
+        const date = ref();
+        const monthNames = ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"];
+        const format = (date) => {
+            const day = date.getDate();
+            const month = monthNames[date.getMonth()];
+            const year = date.getFullYear();
+
+            return `${month} ${day}, ${year}`;
+        }
+        const textInputOptions = ref({
+            format: `mm dd, yyyy`
+        })
+
+        return {
+            date,
+            format,
+            textInputOptions,
+        }
     },
 };
 </script> 
@@ -786,6 +960,7 @@ td#pop div.inline-block {
     border-bottom: 1px solid rgb(233, 230, 230);
 }
 
+#restore-ticket,
 #edit-ticket {
     color: #FFFFFF;
     background-color: rgb(62, 109, 179);
@@ -793,14 +968,43 @@ td#pop div.inline-block {
     border-radius: 5px 0px 0px 5px;
 }
 
+#restore-ticket {
+    color: #FFFFFF;
+    background-color: rgb(62, 109, 179);
+    width: 150px;
+    border-radius: 5px 0px 0px 5px;
+}
+
+#restore-ticket:hover,
 #edit-ticket:hover {
     background-color: rgb(29, 50, 83);
+}
+
+#spamButton,
+#deleteButton {
+    color: #FFFFFF;
+    background-color: rgb(62, 109, 179);
+    width: 130px;
+    border-radius: 5px;
+    font-weight: normal;
+    float: right;
+}
+
+#cancelButtonSpam,
+#cancelButton {
+    border: none;
+    box-shadow: none;
+    margin-left: 0px;
+    width: 80px;
+    font-weight: normal;
+    float: right;
 }
 
 #clear-selection {
     width: 140px;
 }
 
+#menu-selected2,
 #menu-selected {
     width: 40px;
     margin-left: 1px;
@@ -809,6 +1013,7 @@ td#pop div.inline-block {
     border-radius: 0px 5px 5px 0px;
 }
 
+#menu-selected2:hover,
 #menu-selected:hover {
     background-color: rgb(29, 50, 83);
 }
@@ -855,7 +1060,7 @@ td#pop div.inline-block {
 
 .float-child-1 {
     width: 30%;
-    display: flex;
+    /* display: flex; */
     padding: 10px;
     padding-right: 30px;
     border-right: 1px solid rgb(228, 227, 227);
@@ -867,7 +1072,7 @@ td#pop div.inline-block {
 
 .float-child-2 {
     display: flex;
-    width: 55%;
+    width: 64%;
     padding: 20px;
     flex-direction: column;
 }
@@ -882,9 +1087,13 @@ td#pop div.inline-block {
     border: 1px solid rgb(228, 227, 227);
     border-radius: 5px;
     background-color: white;
+    max-height: 380px;
+    overflow-y: auto;
 }
 
 .type {
+    width: 50%;
+    float: left;
     padding-right: 20px;
 }
 
@@ -933,6 +1142,7 @@ td#pop div.inline-block {
     max-height: 600px;
 }
 
+#popcontent-menu-edit2,
 #popcontent-menu-edit {
     width: 280px;
     background: rgb(255, 255, 255);
@@ -941,6 +1151,7 @@ td#pop div.inline-block {
     border-radius: 10px;
 }
 
+#popcontent-menu-edit2 :hover,
 #popcontent-menu-edit :hover {
     background-color: aliceblue;
 }
@@ -957,5 +1168,186 @@ input[type=text] {
 .text-modal {
     margin-bottom: 8px;
     display: inline-block;
+    font-weight: bold;
+}
+
+.dropbtn {
+    background-color: #ffffff;
+    color: rgb(0, 0, 0);
+    font-size: 12px;
+    border: 1px solid gray;
+    cursor: pointer;
+    height: 30px;
+    margin: auto;
+    text-align: left;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    width: 100%;
+}
+
+.dropdown {
+    display: inline-block;
+    width: 100%;
+}
+
+.dropdown-content {
+    position: absolute;
+    background-color: #ffffff;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    border-color: #888888;
+    z-index: 1;
+    max-width: 130px;
+    margin: 0px;
+}
+
+a {
+    max-width: 100%;
+    margin: 0px;
+    height: 25px;
+    border-bottom: 2px solid rgb(255, 255, 255);
+    border-top: 2px solid rgb(255, 255, 255);
+}
+
+.dropdown-content a {
+    color: black;
+    text-decoration: none;
+    display: block;
+    width: 120px;
+    padding-left: 10px;
+    padding-top: 10px;
+    cursor: pointer;
+}
+
+.dropdown-content a:hover {
+    background-color: #c3d5da;
+    border-bottom: 2px solid rgb(113, 160, 212);
+    border-top: 2px solid rgb(113, 160, 212);
+}
+
+.dropdown:hover .dropbtn {
+    border-color: rgb(0, 60, 138);
+    background-color: white;
+}
+
+.down-arrow {
+    float: right;
+}
+
+#expand-arrow {
+    float: right;
+    margin-right: 8px;
+}
+
+.dropbtn-1 {
+    background-color: #ffffff;
+    color: rgb(0, 0, 0);
+    font-size: 12px;
+    border: 1px solid gray;
+    cursor: pointer;
+    height: 30px;
+    margin: auto;
+    text-align: left;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    width: 100%;
+}
+
+.dropdown-1 {
+    display: inline-block;
+    width: 100%;
+}
+
+.dropdown-content-1 {
+    position: absolute;
+    background-color: #ffffff;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    border-color: #888888;
+    z-index: 1;
+    width: 278px;
+    margin: 0px;
+}
+
+.dropdown-content-1 a {
+    color: black;
+    text-decoration: none;
+    display: block;
+    width: 268px;
+    padding-left: 10px;
+    padding-top: 10px;
+    cursor: pointer;
+}
+
+.dropdown-content-1 a:hover {
+    background-color: #c3d5da;
+    border-bottom: 2px solid rgb(113, 160, 212);
+    border-top: 2px solid rgb(113, 160, 212);
+}
+
+.dropdown-1:hover .dropbtn-1 {
+    border-color: rgb(0, 60, 138);
+    background-color: white;
+}
+
+#groupOfPeople {
+    margin-right: 5px;
+}
+
+#priority-choose {
+    padding-right: 0px;
+}
+
+#link-style {
+    color: #0000EE;
+    font-weight: normal;
+    margin-bottom: 0px;
+}
+
+#link-style:hover {
+    text-decoration: underline;
 }
 </style>
+<style>
+.v3ti span.v3ti-tag {
+    display: flex;
+    font-weight: 400;
+    margin: 3px;
+    padding: 0 5px;
+    background: #f3f3f3 !important;
+    color: #000000 !important;
+    height: 27px;
+    border-radius: 5px;
+    align-items: center;
+    border: 1px solid #636363;
+}
+
+.v3ti .v3ti-tag .v3ti-remove-tag {
+    color: #000000;
+    transition: opacity 0.3s ease;
+    opacity: 0.8;
+    cursor: pointer;
+    padding: 0 5px 0 7px;
+}
+
+.vm {
+    position: relative;
+    margin: 0 auto;
+    width: calc(100% - 20px);
+    min-width: 110px;
+    max-width: 500px;
+    background-color: #fff;
+    top: 30px;
+    cursor: default;
+    box-shadow: 0 5px 15px #00000080;
+    font-family: 'Roboto';
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.vm-title {
+    margin-top: 2px;
+    margin-bottom: 0;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+}
+</style> 
