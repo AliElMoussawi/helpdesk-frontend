@@ -1,15 +1,13 @@
 <template>
-  <ViewTicket />
+  <router-view></router-view>
 </template>
 
 <script>
-import ViewTicket from "./components/viewTickets.vue";
+// import ViewTicket from "./components/viewTickets.vue";
 
 export default {
   name: 'App',
-  components: {
-    ViewTicket
-}
+
 }
 </script>
 
