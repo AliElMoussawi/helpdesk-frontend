@@ -8,12 +8,12 @@
 
                 <p>Sign in to your account</p>
 
-                <span class="label">Email</span>
-                <input type="email" id="email" name="email">
+                <span class="label">Username</span>
+                <input v-model="this.username" type="text" id="email" name="email">
                 <span class="label">Password</span>
-                <input type="password" id="password" name="password">
+                <input v-model="this.password" type="password" id="password" name="password">
 
-                <button id="login-button">Sign in</button>
+                <button id="login-button" v-on:click="login()">Sign in</button>
 
                 <p class="bottom-text">Forgot my password</p>
                 <br />
@@ -25,8 +25,35 @@
 </template>
 
 <script>
+import axios from 'axios'
+import router from '../router'
 export default {
     name: 'LoginItem',
+
+    data() {
+        return {
+            username: '',
+            password: '',
+            url: 'http://192.168.3.25:8080/',
+        }
+    },
+    methods: {
+        login() {
+            axios
+                .post(this.url + 'auth/login', {
+                    username: this.username,
+                    password: this.password
+                })
+                .then((response) => {
+                    this.$store.commit('login',response.data)
+                    router.push({name: 'Tickets'})
+                    console.log(this.$store.state)
+                }).catch((error) => {
+                    console.log(error.response)
+                })
+        }
+    }
+
 }
 
 </script>
@@ -83,7 +110,7 @@ html {
     width: 100%;
 }
 
-.bottom-text:hover{ 
+.bottom-text:hover {
     text-decoration: underline;
     cursor: pointer;
 }

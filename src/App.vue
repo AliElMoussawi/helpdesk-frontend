@@ -4,10 +4,11 @@
 
 <script>
 // import ViewTicket from "./components/viewTickets.vue";
-
 export default {
   name: 'App',
-
+  created(){
+    this.$router.push("login")
+  }
 }
 </script>
 

@@ -1,4 +1,5 @@
 <template>
+    <TheNavigation />
     <div class="p-10">
         <div id="collapse-left" v-show="!isOpen">
             <button class="collapse" @click="isOpen = !isOpen">
@@ -24,25 +25,25 @@
 
                 <div v-for="col in respectiveColumns" :key="col.tabName">
                     <button class="tab" v-on:click="changeCurrentTab(col.tabName)">
-                        {{ col.tabName }} <span id="numTickets">{{ this.getRespectiveRows(col.tabName).length }}</span>
+                        {{ col.tabName }} <span id="numTickets">{{ col.respectiveRows.length }}</span>
                     </button>
                 </div>
             </div>
         </CollapseTransition>
         <div class="table-container">
-            <div id="top-right-elements">
+            <div id="top-right-elements" style="margin-top: 50px;">
                 <button class="button-39" role="button"
-                    v-show="this.ticketIdsSelected.length == 0 && (this.currentTab != 'Deleted tickets' && this.currentTab != 'Suspended tickets')">Play</button>
+                    v-show="this.ticketIdsSelected.length == 0 && (this.currentTypeName != 'Deleted tickets' && this.currentTypeName != 'Suspended tickets')">Play</button>
                 <button class="button-39" id="clear-selection" v-show="this.ticketIdsSelected.length != 0"
                     v-on:click="clearSelection()">Clear
                     selection</button>
                 <button @click="$refs.modalName.openModal()" class="button-39" id="edit-ticket"
-                    v-show="this.ticketIdsSelected.length != 0 && this.currentTab != 'Deleted tickets'">Edit
+                    v-show="this.ticketIdsSelected.length != 0 && this.currentTypeName != 'Deleted tickets'">Edit
                     ticket</button>
 
                 <Popper>
                     <button class="button-39" id="menu-selected"
-                        v-show="this.ticketIdsSelected.length != 0 && this.currentTab != 'Deleted tickets'">˅</button>
+                        v-show="this.ticketIdsSelected.length != 0 && this.currentTypeName != 'Deleted tickets'">˅</button>
                     <template #content>
                         <div id="popcontent-menu-edit">
                             <div class="menu-component">Merge tickets into another ticket</div>
@@ -52,12 +53,12 @@
                     </template>
                 </Popper>
                 <button class="button-39" id="restore-ticket"
-                    v-show="this.ticketIdsSelected.length != 0 && this.currentTab == 'Deleted tickets'">Restore
+                    v-show="this.ticketIdsSelected.length != 0 && this.currentTypeName == 'Deleted tickets'">Restore
                     {{ this.ticketIdsSelected.length }} ticket(s)</button>
 
                 <Popper>
                     <button class="button-39" id="menu-selected2"
-                        v-show="this.ticketIdsSelected.length != 0 && this.currentTab == 'Deleted tickets'">˅</button>
+                        v-show="this.ticketIdsSelected.length != 0 && this.currentTypeName == 'Deleted tickets'">˅</button>
                     <template #content>
                         <div id="popcontent-menu-edit2">
                             <div class="menu-component">Delete {{ this.ticketIdsSelected.length }} ticket(s) forever
@@ -68,7 +69,7 @@
                 </Popper>
                 <Popper>
                     <button class="button-39" id="down-menu"
-                        v-show="this.currentTab != 'Deleted tickets' && this.currentTab != 'Suspended tickets'">˅</button>
+                        v-show="this.currentTypeName != 'Deleted tickets' && this.currentTypeName != 'Suspended tickets'">˅</button>
                     <template #content>
                         <div id="popcontent-menu">
                             <div class="menu-component" id="CSV">Export as CSV</div>
@@ -78,11 +79,9 @@
                     </template>
                 </Popper>
             </div>
-            <br />
-            <br />
             <div id="table-title">
-                <h2>{{ this.currentTab }}</h2>
-                {{ getRespectiveRows(this.currentTab).length }} tickets
+                <h2>{{ this.currentTypeName }}</h2>
+                {{ this.respectiveColumns[currentIndex].respectiveRows.length }} tickets
                 <br />
                 <br />
             </div>
@@ -127,15 +126,15 @@
                                 v-bind:class="ascending ? 'arrow_up' : 'arrow_down'"></div>
                         </th>
                         <th class="p-5" v-on:click="sortTable('cause of suspension')"
-                            v-show="checkExists('Cause of suspension')">Cause of
-                            suspension
+                            v-show="checkExists('Cause of suspension')">Cause of suspension
                             <div class="arrow" v-if="'cause of suspension' == sortColumn"
                                 v-bind:class="ascending ? 'arrow_up' : 'arrow_down'"></div>
                         </th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="ticket in getRespectiveRows(this.currentTab)" :key="ticket.id">
+                    <tr v-for="ticket in this.respectiveColumns[currentIndex].respectiveRows"
+                        :key="ticket.id">
                         <td><input type="checkbox" v-model="ticketIdsSelected" @click="select(ticket.id)"
                                 :value="ticket.id" /></td>
                         <td v-show="checkExists('ID')">{{ ticket.id }}</td>
@@ -159,14 +158,13 @@
                                 </template>
                             </Popper>
                         </td>
-                        <td v-show="checkExists('Requester')">{{ ticket.requester }}</td>
+                        <td v-show="checkExists('Requester')">{{ ticket.requester.username }}</td>
                         <td v-show="checkExists('Requested')">{{ getDate(ticket.requested) }}</td>
-                        <td v-show="checkExists('Type')">{{ ticket.type }}</td>
-                        <td v-show="checkExists('Priority')">{{ ticket.priority }}</td>
-                        <td v-show="checkExists('Group')">{{ getGroup(ticket.assignee.assignee_id) }}</td>
+                        <td v-show="checkExists('Type')">{{ ticket.ticketType.name }}</td>
+                        <td v-show="checkExists('Priority')">{{ ticket.priority.name }}</td>
+                        <td v-show="checkExists('Group')">{{ ticket.assignedGroup.name }}</td>
                         <td v-show="checkExists('Updated')">{{ getDate(ticket.updated) }}</td>
-                        <td v-show="checkExists('Assignee')">{{ ticket.assignee.assignee_name
-                        }}</td>
+                        <td v-show="checkExists('Assignee')">{{ ticket.assignedUser.username }}</td>
                         <td v-show="checkExists('Cause of suspension')">{{ ticket.suspension_cause }}</td>
                     </tr>
                     <div v-show="this.load" class="loader">Loading...</div>
@@ -282,11 +280,11 @@
                                 </div>
                             </div>
                         </div>
-                        <br v-show="chosenType=='Task'"/>
-                        <span class="text-modal" v-show="chosenType=='Task'">Due Date</span>
+                        <br v-show="chosenType == 'Task'" />
+                        <span class="text-modal" v-show="chosenType == 'Task'">Due Date</span>
                         <Datepicker v-model="date" :enableTimePicker="false" weekStart="0" :format="format"
                             :previewFormat="format" placeholder="Select date" :textInputOptions="textInputOptions"
-                            textInput v-show="chosenType=='Task'"/>
+                            textInput v-show="chosenType == 'Task'" />
                     </div>
                 </div>
                 <div class="float-child-2">
@@ -347,6 +345,9 @@ import '@kouts/vue-modal/dist/vue-modal.css';
 import { ref } from 'vue';
 import Datepicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
+import axios from 'axios'
+import TheNavigation from './TheNavigation.vue';
+
 export default {
     name: 'ViewTicket',
     components: {
@@ -356,10 +357,20 @@ export default {
         EmojiPicker,
         Vue3TagsInput,
         VueModal,
-        Datepicker
+        Datepicker,
+        TheNavigation
+    },
+    created() {
+        this.getData();
+        for (var respectiveColumn of this.respectiveColumns) {
+            this.getRespectiveRows(respectiveColumn.tabType)
+        }
+    },
+    mounted(){
     },
     data() {
         return {
+            url: 'http://192.168.3.25:8080/',
             showModalSpam: false,
             showModal: false, //for the deleteTicket
             groupClicked: false,
@@ -379,54 +390,83 @@ export default {
             tickets: [],
             groups: [],
             load: false,
-            currentTab: "Your unsolved tickets",
+            currentType: "unAssignedTickets",
+            currentTypeName: "Unassigned tickets",
+            currentIndex: 1,
             ticketIdsSelected: [],
             allSelected: false,
             respectiveColumns: [
                 {
                     "tabName": "Your unsolved tickets",
-                    "tabColumns": ['Subject', 'Requester', 'Requested', 'Type', 'Priority']
+                    "tabType": "userUnSolvedTickets",
+                    "tabColumns": ['Subject', 'Requester', 'Requested', 'Type', 'Priority'],
+                    "respectiveRows": []
                 },
                 {
                     "tabName": "Unassigned tickets",
-                    "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Group']
+                    "tabType": "unAssignedTickets",
+                    "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Group'],
+                    "respectiveRows": []
                 },
                 {
                     "tabName": "All unsolved tickets",
-                    "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Updated']
+                    "tabType": "unsolvedTickets",
+                    "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Updated'],
+                    "respectiveRows": []
                 },
                 {
                     "tabName": "Recently updated tickets",
-                    "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Group', 'Assignee']
+                    "tabType": "updatedTickets",
+                    "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Group', 'Assignee'],
+                    "respectiveRows": []
                 },
                 {
                     "tabName": "New tickets in your groups",
-                    "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Assignee']
+                    "tabType": "newTickets",
+                    "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Assignee'],
+                    "respectiveRows": []
                 },
                 {
                     "tabName": "Pending tickets",
-                    "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Group', 'Assignee']
+                    "tabType": "pendingTickets",
+                    "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Group', 'Assignee'],
+                    "respectiveRows": []
                 },
                 {
                     "tabName": "Recently solved tickets",
-                    "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Group']
+                    "tabType": "solvedTickets",
+                    "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Group'],
+                    "respectiveRows": []
                 },
                 {
                     "tabName": "Unsolved tickets in your groups",
-                    "tabColumns": ['Subject', 'Requester', 'Requested']
+                    "tabType": "unsolvedTickets",
+                    "tabColumns": ['Subject', 'Requester', 'Requested'],
+                    "respectiveRows": []
                 },
                 {
                     "tabName": "Suspended tickets",
-                    "tabColumns": ['Received', 'Subject', 'Cause of suspension']
+                    "tabType": 'suspendedTickets',
+                    "tabColumns": ['Received', 'Subject', 'Cause of suspension'],
+                    "respectiveRows": []
                 },
                 {
                     "tabName": "Deleted tickets",
-                    "tabColumns": ['ID', 'Subject']
+                    "tabType": "deletedTickets",
+                    "tabColumns": ['ID', 'Subject', 'Deleted', 'Deleted By'],
+                    "respectiveRows": []
                 }
             ],
         }
     },
+
     methods: {
+        getTabTypeByName(tName) {
+            return this.respectiveColumns.find(c => c.tabName === tName).tabType;
+        },
+        getIndexByName(tName) {
+            return this.respectiveColumns.indexOf(c => c.tabName === tName);
+        },
         handleChangeTagAdd(tags) {
             this.tagsToAdd = tags;
         },
@@ -442,8 +482,6 @@ export default {
             this.chosenAssignee = newAssignee;
             this.assigneeClicked = false;
             this.groupClicked = false;
-            console.log(this.tagsToAdd);
-            console.log(this.tagsToRemove);
         },
         getUserName(id) {
             return this.users.find(u => u.id === id).name;
@@ -460,8 +498,8 @@ export default {
             this.ticketIdsSelected = [];
 
             if (!this.allSelected) {
-                for (const ticket in this.getRespectiveRows(this.currentTab)) {
-                    this.ticketIdsSelected.push(this.getRespectiveRows(this.currentTab)[ticket].id.toString());
+                for (const row of this.respectiveColumns.find(c => c.tabType === this.currentType).respectiveRows) {
+                    this.ticketIdsSelected.push(row.id.toString());
                 }
             }
         },
@@ -517,6 +555,9 @@ export default {
             return this.users.find(u => u.id === id).group.group_name;
         },
         getDate(timestamp) {
+            if (timestamp == null) {
+                return null
+            }
             var ts = new Date(timestamp);
 
             return (ts.getDate() +
@@ -532,7 +573,7 @@ export default {
         },
         checkExists(val) {
             for (var i = 0; i < this.respectiveColumns.length; i++) {
-                if (this.respectiveColumns[i].tabName == this.currentTab) {
+                if (this.respectiveColumns[i].tabName == this.currentTypeName) {
                     if (this.respectiveColumns[i].tabColumns.includes(val)) {
                         return true;
                     }
@@ -541,89 +582,28 @@ export default {
             }
         },
         changeCurrentTab(val) {
-            this.currentTab = val;
+            this.currentTypeName = val;
             this.allSelected = false;
             this.ticketIdsSelected = [];
+            this.currentType = this.getTabTypeByName(this.currentTypeName);
+            this.currentIndex = this.getIndexByName(this.currentTypeName);
         },
-        getRespectiveRows(tabName) {
-            if (tabName == 'Your unsolved tickets') {
-                let respectiveRows = [];
-                for (let i = 0; i < this.tickets.length; i++)
-                    if (this.tickets[i].status == "unsolved" && this.currentUserID == this.tickets[i].assignee.assignee_id)
-                        respectiveRows.push(this.tickets[i]);
-                return respectiveRows
-            } else if (tabName == 'Unassigned tickets') {
-                let respectiveRows = [];
-                for (let i = 0; i < this.tickets.length; i++)
-                    if (this.tickets[i].status == "unassigned")
-                        respectiveRows.push(this.tickets[i]);
-                return respectiveRows
-            } else if (tabName == 'All unsolved tickets') {
-                let respectiveRows = [];
-                for (let i = 0; i < this.tickets.length; i++)
-                    if (this.tickets[i].status == "unsolved")
-                        respectiveRows.push(this.tickets[i]);
-                return respectiveRows
-            } else if (tabName == 'Recently updated tickets') {
-                let respectiveRows = [];
-                let currentYear = new Date().getFullYear();
-                let currentMonth = new Date().getMonth();
-                for (let i = 0; i < this.tickets.length; i++) {
-                    let updateDate = new Date(this.tickets[i].updated);
-                    if (updateDate.getFullYear() == currentYear && updateDate.getMonth() == currentMonth)
-                        respectiveRows.push(this.tickets[i]);
+        async getRespectiveRows(type) {
+            var instance = axios.create({
+                headers: {
+                    'sessionId': this.$store.state.session,
+                    'token': this.$store.state.token
                 }
-                return respectiveRows
-            } else if (tabName == 'New tickets in your groups') {
-                let respectiveRows = [];
-                let currentYear = new Date().getFullYear();
-                let currentMonth = new Date().getMonth();
-                for (let i = 0; i < this.tickets.length; i++) {
-                    let requestedDate = new Date(this.tickets[i].requested);
-                    if (requestedDate.getFullYear() == currentYear && requestedDate.getMonth() == currentMonth && this.getGroup(this.tickets[i].assignee.assignee_id) == this.getGroup(this.currentUserID))
-                        respectiveRows.push(this.tickets[i]);
-                }
-                return respectiveRows
-            } else if (tabName == 'Pending tickets') {
-                let respectiveRows = [];
-                for (let i = 0; i < this.tickets.length; i++)
-                    if (this.tickets[i].status == "pending")
-                        respectiveRows.push(this.tickets[i]);
-                return respectiveRows
-            } else if (tabName == 'Recently solved tickets') {
-                let respectiveRows = [];
-                for (let i = 0; i < this.tickets.length; i++) {
-                    if (this.tickets[i].status == "solved")
-                        respectiveRows.push(this.tickets[i]);
-                }
-                return respectiveRows
-            } else if (tabName == 'Unsolved tickets in your groups') {
-                let respectiveRows = [];
-                for (let i = 0; i < this.tickets.length; i++) {
-                    if (this.tickets[i].status == "unsolved" && this.getGroup(this.tickets[i].assignee.assignee_id) == this.getGroup(this.currentUserID))
-                        respectiveRows.push(this.tickets[i]);
-                }
-                return respectiveRows
-            } else if (tabName == 'Suspended tickets') {
-                let respectiveRows = [];
-                for (let i = 0; i < this.tickets.length; i++) {
-                    if (this.tickets[i].status == "suspended")
-                        respectiveRows.push(this.tickets[i]);
-                }
-                return respectiveRows
-            } else if (tabName == 'Deleted tickets') {
-                let respectiveRows = [];
-                for (let i = 0; i < this.tickets.length; i++) {
-                    if (this.tickets[i].status == "deleted")
-                        respectiveRows.push(this.tickets[i]);
-                }
-                return respectiveRows
-            }
-        },
+            })
+            instance.get(this.url + 'ticket/' + type).then((response) => {
+                this.respectiveColumns.find(c => c.tabType === type).respectiveRows = JSON.parse(JSON.stringify(response.data));
+                console.log(this.respectiveColumns)
+            }).catch((error) => {
+                console.log(error.response);
+            })
+        }
     },
-    created: function () {
-        this.getData();
-    },
+
     setup() {
         const date = ref();
         const monthNames = ["January", "February", "March", "April", "May", "June",
@@ -660,7 +640,7 @@ export default {
     display: flex;
     flex-direction: column;
     padding-right: 25px;
-    border-right: 1px solid rgb(185, 179, 179);
+    border-right: 1px solid rgb(230, 230, 230);
 }
 
 td {
@@ -671,7 +651,7 @@ td {
 .views-title {
     padding-left: 5px;
     padding-bottom: 10px;
-    border-bottom: 1px solid rgb(185, 179, 179);
+    border-bottom: 1px solid rgb(230, 230, 230);
     margin-left: 5%;
     padding-top: 20px;
     margin-bottom: 10px;
@@ -918,7 +898,7 @@ h5 {
     right: 10px;
     width: 400px;
     height: 200px;
-
+    z-index: -1;
     margin-right: 20px;
     display: flex;
     align-items: right;
@@ -1126,7 +1106,7 @@ td#pop div.inline-block {
 #collapse-left {
     margin-left: 0px;
     padding-right: 10px;
-    border-right: 1px solid rgb(185, 179, 179);
+    border-right: 1px solid rgb(230, 230, 230);
     padding-top: 20px;
 }
 
@@ -1261,7 +1241,7 @@ a {
     position: absolute;
     background-color: #ffffff;
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-    border-color: #888888;
+    border-color: #8888;
     z-index: 1;
     width: 278px;
     margin: 0px;
