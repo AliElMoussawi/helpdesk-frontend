@@ -8,8 +8,8 @@
                             <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
                         </svg></button>
                     <template #content>
-                        <div id="popcontent-menu">
-                            <div class="menu-component" id="CSV">Product updates</div>
+                        <div id="popcontent-menu" >
+                            <div class="menu-component">Product updates</div>
                             <div class="menu-component">Get help</div>
                             <div class="menu-component">Support help center</div>
                             <div class="menu-component">Keyboard shortcuts</div>
@@ -22,9 +22,10 @@
                     </template>
                 </Popper>
             </div>
-
-
         </nav>
+        <div>
+            <router-link id="add-button" to="/newTicket"> + Add </router-link>
+        </div>
     </header>
 </template>
 
@@ -40,6 +41,7 @@ export default {
 
 <style scoped>
 header {
+    font-family: 'Roboto', sans-serif;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -48,12 +50,7 @@ header {
     background: #ffffff;
     transition: background 0.3s ease-in-out;
     border-bottom: 1px solid rgb(230, 230, 230);
-}
-
-header h1 {
-    font-size: 32px;
-    text-transform: uppercase;
-    font-weight: 900;
+    z-index: -2;
 }
 
 header nav {
@@ -61,9 +58,7 @@ header nav {
     position: fixed;
     top: 10px;
     right: 10px;
-    width: 400px;
-    height: 200px;
-
+    z-index: 1;
     margin-right: 20px;
     align-items: right;
     justify-content: end;
@@ -82,6 +77,7 @@ header nav {
     padding-top: 5px;
     border: 1px solid rgb(233, 230, 230);
     border-radius: 10px;
+    margin-right: 30px;
 }
 
 #popcontent-menu :hover {
@@ -94,4 +90,19 @@ header nav {
     padding-left: 20px;
     padding-right: 20px;
 }
+
+#add-button{ 
+    border: none;
+    background: none;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 15px;
+    color: black;
+    text-decoration: none;
+}
+
+#add-button:hover{ 
+    cursor: pointer;
+}
+
 </style>

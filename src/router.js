@@ -1,6 +1,8 @@
 import HomeItem from './components/HomeItem.vue'
 import LoginItem from './components/Login.vue'
 import ViewTicket from './components/viewTickets.vue'
+import NewTicket from './components/NewTicket.vue'
+
 import { createWebHistory, createRouter } from "vue-router";
 
 const routes = [
@@ -18,6 +20,11 @@ const routes = [
     path: '/tickets', 
     name: "Tickets", 
     component: ViewTicket
+  },
+  { 
+    path: '/newTicket', 
+    name: "NewTicket", 
+    component: NewTicket
   }
 ]
 

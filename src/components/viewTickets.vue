@@ -53,17 +53,20 @@
                     </template>
                 </Popper>
                 <button class="button-39" id="restore-ticket"
-                    v-show="this.ticketIdsSelected.length != 0 && this.currentTypeName == 'Deleted tickets'">Restore
+                    v-show="this.ticketIdsSelected.length != 0 && this.currentTypeName == 'Deleted tickets'"
+                    @click="restoreTicket()">Restore
                     {{ this.ticketIdsSelected.length }} ticket(s)</button>
 
                 <Popper>
                     <button class="button-39" id="menu-selected2"
                         v-show="this.ticketIdsSelected.length != 0 && this.currentTypeName == 'Deleted tickets'">˅</button>
                     <template #content>
-                        <div id="popcontent-menu-edit2">
-                            <div class="menu-component">Delete {{ this.ticketIdsSelected.length }} ticket(s) forever
+                        <div id="popcontent-menu-edit2" v-show="this.ticketIdsSelected.length != 0">
+                            <div class="menu-component" @click="showModalDeleteForever = true">Delete {{ this.ticketIdsSelected.length }} ticket(s) forever
                             </div>
-                            <div class="menu-component">Restore {{ this.ticketIdsSelected.length }} ticket(s)</div>
+                            <div class="menu-component" @click="restoreTicket()">Restore {{
+                                    this.ticketIdsSelected.length
+                            }} ticket(s)</div>
                         </div>
                     </template>
                 </Popper>
@@ -71,7 +74,7 @@
                     <button class="button-39" id="down-menu"
                         v-show="this.currentTypeName != 'Deleted tickets' && this.currentTypeName != 'Suspended tickets'">˅</button>
                     <template #content>
-                        <div id="popcontent-menu">
+                        <div id="popcontent-menu" style="margin-right: 30px;">
                             <div class="menu-component" id="CSV">Export as CSV</div>
                             <div class="menu-component">Edit</div>
                             <div class="menu-component">Clone</div>
@@ -89,52 +92,16 @@
                 <thead>
                     <tr id="header">
                         <th><input name="select_all" type="checkbox" @click="selectAll" v-model="allSelected"></th>
-                        <th class="p-5" v-on:click="sortTable('id')" v-show="checkExists('ID')">ID
-                            <div class="arrow" v-if="'id' == sortColumn"
-                                v-bind:class="ascending ? 'arrow_up' : 'arrow_down'"></div>
-                        </th>
-                        <th class="p-5" v-on:click="sortTable('subject')" v-show="checkExists('Subject')">Subject
-                            <div class="arrow" v-if="'subject' == sortColumn"
-                                v-bind:class="ascending ? 'arrow_up' : 'arrow_down'"></div>
-                        </th>
-                        <th class="p-5" v-on:click="sortTable('requester')" v-show="checkExists('Requester')">Requester
-                            <div class="arrow" v-if="'requester' == sortColumn"
-                                v-bind:class="ascending ? 'arrow_up' : 'arrow_down'"></div>
-                        </th>
-                        <th class="p-5" v-on:click="sortTable('requested')" v-show="checkExists('Requested')">Requested
-                            <div class="arrow" v-if="'requested' == sortColumn"
-                                v-bind:class="ascending ? 'arrow_up' : 'arrow_down'"></div>
-                        </th>
-                        <th class="p-5" v-on:click="sortTable('type')" v-show="checkExists('Type')">Type
-                            <div class="arrow" v-if="'type' == sortColumn"
-                                v-bind:class="ascending ? 'arrow_up' : 'arrow_down'"></div>
-                        </th>
-                        <th class="p-5" v-on:click="sortTable('priority')" v-show="checkExists('Priority')">Priority
-                            <div class="arrow" v-if="'priority' == sortColumn"
-                                v-bind:class="ascending ? 'arrow_up' : 'arrow_down'"></div>
-                        </th>
-                        <th class="p-5" v-on:click="sortTable('Group')" v-show="checkExists('Group')">Group
-                            <div class="arrow" v-if="'Group' == sortColumn"
-                                v-bind:class="ascending ? 'arrow_up' : 'arrow_down'"></div>
-                        </th>
-                        <th class="p-5" v-on:click="sortTable('updated')" v-show="checkExists('Updated')">Updated
-                            <div class="arrow" v-if="'updated' == sortColumn"
-                                v-bind:class="ascending ? 'arrow_up' : 'arrow_down'"></div>
-                        </th>
-                        <th class="p-5" v-on:click="sortTable('assignee')" v-show="checkExists('Assignee')">Assignee
-                            <div class="arrow" v-if="'assignee' == sortColumn"
-                                v-bind:class="ascending ? 'arrow_up' : 'arrow_down'"></div>
-                        </th>
-                        <th class="p-5" v-on:click="sortTable('cause of suspension')"
-                            v-show="checkExists('Cause of suspension')">Cause of suspension
-                            <div class="arrow" v-if="'cause of suspension' == sortColumn"
+                        <th class="p-5" v-for="(colHead, index) in this.respectiveColumns[currentIndex].tabColumns"
+                            :key="index" v-on:click="sortTable(colHead)">
+                            {{ colHead }}
+                            <div class="arrow" v-if="colHead == sortColumn"
                                 v-bind:class="ascending ? 'arrow_up' : 'arrow_down'"></div>
                         </th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="ticket in this.respectiveColumns[currentIndex].respectiveRows"
-                        :key="ticket.id">
+                    <tr v-for="ticket in this.respectiveColumns[currentIndex].respectiveRows" :key="ticket.id">
                         <td><input type="checkbox" v-model="ticketIdsSelected" @click="select(ticket.id)"
                                 :value="ticket.id" /></td>
                         <td v-show="checkExists('ID')">{{ ticket.id }}</td>
@@ -159,13 +126,25 @@
                             </Popper>
                         </td>
                         <td v-show="checkExists('Requester')">{{ ticket.requester.username }}</td>
-                        <td v-show="checkExists('Requested')">{{ getDate(ticket.requested) }}</td>
-                        <td v-show="checkExists('Type')">{{ ticket.ticketType.name }}</td>
-                        <td v-show="checkExists('Priority')">{{ ticket.priority.name }}</td>
-                        <td v-show="checkExists('Group')">{{ ticket.assignedGroup.name }}</td>
-                        <td v-show="checkExists('Updated')">{{ getDate(ticket.updated) }}</td>
-                        <td v-show="checkExists('Assignee')">{{ ticket.assignedUser.username }}</td>
-                        <td v-show="checkExists('Cause of suspension')">{{ ticket.suspension_cause }}</td>
+                        <td v-show="checkExists('Requested')">{{ ticket.requested }}</td>
+                        <td v-show="checkExists('Type')">{{ ticket.ticketType == null ? "" : ticket.ticketType.name }}
+                        </td>
+                        <td v-show="checkExists('Priority')">{{ ticket.priority == null ? "" : ticket.priority.name }}
+                        </td>
+                        <td v-show="checkExists('Group')">{{ ticket.assignedGroup == null ? ""
+                                : ticket.assignedGroup.name
+                        }}
+                        </td>
+                        <td v-show="checkExists('Updated')">{{ ticket.updated }}</td>
+                        <td v-show="checkExists('Assignee')">{{
+                                ticket.assignedUser == null ? "" : ticket.assignedUser.username
+                        }}</td>
+                        <td v-show="checkExists('Received')">{{ ticket.requested }}</td>
+                        <td v-show="checkExists('Deleted by')">{{ ticket.deletedBy == null ? "" :
+                                ticket.deletedBy.username
+                        }}</td>
+                        <!-- <td v-show="checkExists('Cause of suspension')">{{ ticket.suspension_cause }}</td> -->
+
                     </tr>
                     <div v-show="this.load" class="loader">Loading...</div>
                 </tbody>
@@ -173,7 +152,7 @@
         </div>
     </div>
 
-    <ModalItem ref="modalName" id="modal">
+    <ModalItem ref="modalName" id="modal">currentUserID
         <template v-slot:header>
             <h4 id="popup-header">Update {{ this.ticketIdsSelected.length }} ticket(s)</h4>
         </template>
@@ -248,36 +227,12 @@
                             <div class="type">
                                 <span class="text-modal">Type</span>
                                 <br />
-                                <div class="dropdown">
-                                    <button class="dropbtn"
-                                        @click="typeClicked === false ? typeClicked = true : typeClicked = false">{{
-                                                this.chosenType
-                                        }} <span class="down-arrow">⯆</span></button>
-                                    <div class="dropdown-content" v-show="typeClicked === true">
-                                        <a @click="changeType('- No Change -')">- No Change -</a>
-                                        <a @click="changeType('Question')">Question</a>
-                                        <a @click="changeType('Incident')">Incident</a>
-                                        <a @click="changeType('Problem')">Problem</a>
-                                        <a @click="changeType('Task')">Task</a>
-                                    </div>
-                                </div>
+                                <DropDown :options="this.typeOptions"></DropDown>
                             </div>
                             <div class="type" id="priority-choose">
                                 <span class="text-modal">Priority</span>
                                 <br />
-                                <div class="dropdown">
-                                    <button class="dropbtn"
-                                        @click="priorityClicked === false ? priorityClicked = true : priorityClicked = false">{{
-                                                this.chosenPriority
-                                        }} <span class="down-arrow">⯆</span></button>
-                                    <div class="dropdown-content" v-show="priorityClicked === true">
-                                        <a @click="changePriority('- No Change -')">- No Change -</a>
-                                        <a @click="changePriority('Low')">Low</a>
-                                        <a @click="changePriority('Normal')">Normal</a>
-                                        <a @click="changePriority('High')">High</a>
-                                        <a @click="changePriority('Urgent')">Urgent</a>
-                                    </div>
-                                </div>
+                                <DropDown :options="this.priorityOptions"></DropDown>
                             </div>
                         </div>
                         <br v-show="chosenType == 'Task'" />
@@ -309,8 +264,21 @@
         <p>If you need to restore them, go to Deleted tickets.</p>
         <br />
         <div>
-            <button class="button-39" id="deleteButton">Delete tickets</button>
+            <button class="button-39" id="deleteButton" @click="deleteTicket()">Delete tickets</button>
             <button class="button-39" id="cancelButton" @click="showModal = false">Cancel</button>
+        </div>
+        <br />
+        <br />
+        <br />
+    </VueModal>
+
+    <VueModal v-model="showModalDeleteForever" title="Permanently delete ticket(s)">
+        <p>This can't be undone.</p>
+        <br />
+        <div>
+            <button class="button-39" id="permanentlyDeleteButton" @click="deleteTicket()">Permanently delete
+                ticket(s)</button>
+            <button class="button-39" id="cancelButton" @click="showModalDeleteForever = false">Cancel</button>
         </div>
         <br />
         <br />
@@ -347,6 +315,7 @@ import Datepicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 import axios from 'axios'
 import TheNavigation from './TheNavigation.vue';
+import DropDown from './ourBeautifulDropdown.vue'
 
 export default {
     name: 'ViewTicket',
@@ -358,41 +327,33 @@ export default {
         Vue3TagsInput,
         VueModal,
         Datepicker,
-        TheNavigation
-    },
-    created() {
-        this.getData();
-        for (var respectiveColumn of this.respectiveColumns) {
-            this.getRespectiveRows(respectiveColumn.tabType)
-        }
-    },
-    mounted(){
+        TheNavigation,
+        DropDown,
     },
     data() {
         return {
             url: 'http://192.168.3.25:8080/',
             showModalSpam: false,
             showModal: false, //for the deleteTicket
+            showModalDeleteForever: false,
             groupClicked: false,
             chosenAssignee: "- No Change -",
             assigneeClicked: false,
-            typeClicked: false,
-            priorityClicked: false,
-            chosenPriority: "- No Change -",
-            chosenType: "- No Change -",
+            typeOptions: ['- No Change -', 'Question', 'Incident', 'Problem', 'Task'],
+            priorityOptions: ['- No Change -', 'Low', 'Normal', 'High', 'Urgent'],
             tagsToAdd: [],
             tagsToRemove: [],
             isOpen: true, // for collapsing the views panel
             ascending: false,
             sortColumn: '',
-            currentUserID: 1,
+            currentUserID: this.$store.state.id,
             users: [],
             tickets: [],
             groups: [],
             load: false,
-            currentType: "unAssignedTickets",
-            currentTypeName: "Unassigned tickets",
-            currentIndex: 1,
+            currentType: "userUnSolvedTickets",
+            currentTypeName: "Your unsolved tickets",
+            currentIndex: 0,
             ticketIdsSelected: [],
             allSelected: false,
             respectiveColumns: [
@@ -400,7 +361,7 @@ export default {
                     "tabName": "Your unsolved tickets",
                     "tabType": "userUnSolvedTickets",
                     "tabColumns": ['Subject', 'Requester', 'Requested', 'Type', 'Priority'],
-                    "respectiveRows": []
+                    "respectiveRows": [],
                 },
                 {
                     "tabName": "Unassigned tickets",
@@ -438,22 +399,22 @@ export default {
                     "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Group'],
                     "respectiveRows": []
                 },
-                {
-                    "tabName": "Unsolved tickets in your groups",
-                    "tabType": "unsolvedTickets",
-                    "tabColumns": ['Subject', 'Requester', 'Requested'],
-                    "respectiveRows": []
-                },
+                // {
+                //     "tabName": "Unsolved tickets in your groups",
+                //     "tabType": "unsolvedTickets",
+                //     "tabColumns": ['Subject', 'Requester', 'Requested'],
+                //     "respectiveRows": []
+                // },
                 {
                     "tabName": "Suspended tickets",
                     "tabType": 'suspendedTickets',
-                    "tabColumns": ['Received', 'Subject', 'Cause of suspension'],
+                    "tabColumns": ['Received', 'Subject'],
                     "respectiveRows": []
                 },
                 {
                     "tabName": "Deleted tickets",
                     "tabType": "deletedTickets",
-                    "tabColumns": ['ID', 'Subject', 'Deleted', 'Deleted By'],
+                    "tabColumns": ['ID', 'Subject', 'Deleted by'],
                     "respectiveRows": []
                 }
             ],
@@ -465,7 +426,7 @@ export default {
             return this.respectiveColumns.find(c => c.tabName === tName).tabType;
         },
         getIndexByName(tName) {
-            return this.respectiveColumns.indexOf(c => c.tabName === tName);
+            return this.respectiveColumns.indexOf(this.respectiveColumns.find(c => c.tabName === tName));
         },
         handleChangeTagAdd(tags) {
             this.tagsToAdd = tags;
@@ -485,14 +446,6 @@ export default {
         },
         getUserName(id) {
             return this.users.find(u => u.id === id).name;
-        },
-        changePriority(newPriority) {
-            this.priorityClicked === false ? this.priorityClicked = true : this.priorityClicked = false;
-            this.chosenPriority = newPriority;
-        },
-        changeType(newType) {
-            this.typeClicked === false ? this.typeClicked = true : this.typeClicked = false;
-            this.chosenType = newType;
         },
         selectAll() {
             this.ticketIdsSelected = [];
@@ -521,20 +474,70 @@ export default {
             }
 
             var ascending = this.ascending;
-            if (col === 'assignee') {
-                this.tickets.sort(function (a, b) {
-                    if (a[col]["assignee_name"] > b[col]["assignee_name"]) {
+
+            const tabSort = [
+                {
+                    name: 'Subject',
+                    sort: 'subject',
+                    sort1: null
+                }, {
+                    name: 'Requester',
+                    sort: 'requester',
+                    sort1: 'username'
+                }, {
+                    name: 'Requested',
+                    sort: 'requested',
+                    sort1: null
+                }, {
+                    name: 'Type',
+                    sort: 'ticketType',
+                    sort1: 'name'
+                }, {
+                    name: 'Priority',
+                    sort: 'priority',
+                    sort1: 'name'
+                }, {
+                    name: 'Group',
+                    sort: 'assignedGroup',
+                    sort1: 'name'
+                }, {
+                    name: 'Updated',
+                    sort: 'updated',
+                    sort1: null
+                }, {
+                    name: 'Assignee',
+                    sort: 'assignedUser',
+                    sort1: 'username'
+                }, {
+                    name: 'ID',
+                    sort: 'id',
+                    sort1: null
+                }, {
+                    name: 'Received',
+                    sort: 'requested',
+                    sort1: 'name'
+                }, {
+                    name: 'Deleted by',
+                    sort: 'deletedBy',
+                    sort1: 'username'
+                }
+            ];
+            const index = tabSort.indexOf(tabSort.find(g => g.name === col));
+            if (tabSort[index].sort1 == null) {
+                this.respectiveColumns[this.currentIndex].respectiveRows.sort(function (a, b) {
+                    if (a[tabSort[index].sort] > b[tabSort[index].sort]) {
                         return ascending ? 1 : -1
-                    } else if (a[col]["assignee_name"] < b[col]["assignee_name"]) {
+                    } else if (a[tabSort[index].sort] < b[tabSort[index].sort]) {
                         return ascending ? -1 : 1
                     }
                     return 0;
                 })
-            } else {
-                this.tickets.sort(function (a, b) {
-                    if (a[col] > b[col]) {
+            }
+            else {
+                this.respectiveColumns[this.currentIndex].respectiveRows.sort(function (a, b) {
+                    if (a[tabSort[index].sort][tabSort[index].sort1] > b[tabSort[index].sort][tabSort[index].sort1]) {
                         return ascending ? 1 : -1
-                    } else if (a[col] < b[col]) {
+                    } else if (a[tabSort[index].sort][tabSort[index].sort1] < b[tabSort[index].sort][tabSort[index].sort1]) {
                         return ascending ? -1 : 1
                     }
                     return 0;
@@ -542,16 +545,27 @@ export default {
             }
         },
         getData() {
+            setTimeout(function () { this.load = true; }.bind(this), 10);
+            setTimeout(function () {
+                for (var respectiveColumn of this.respectiveColumns) {
+                    this.getRespectiveRows(respectiveColumn.tabType)
+                }
+            }.bind(this), 3000);
+
+            // setTimeout(function () { this.getUsers() }.bind(this), 3000);
             setTimeout(function () { this.users = usersData; }.bind(this), 3000);
             setTimeout(function () { this.tickets = ticketsData; }.bind(this), 3000);
             setTimeout(function () { this.groups = groupsData; }.bind(this), 3000);
-            setTimeout(function () { this.load = true; }.bind(this), 10);
+
             setTimeout(function () { this.load = false; }.bind(this), 3000);
+            console.log(this.currentUserID)
         },
         getCurrentGroupUsers(groupName) {
             return this.groups.find(g => g.name == groupName).users;
         },
         getGroup(id) {
+
+            // const group = this.respectiveColumns[this.currentIndex].respectiveRows.find(u => u.id === id).assignedGroup;
             return this.users.find(u => u.id === id).group.group_name;
         },
         getDate(timestamp) {
@@ -572,14 +586,20 @@ export default {
             this.allSelected = false;
         },
         checkExists(val) {
-            for (var i = 0; i < this.respectiveColumns.length; i++) {
-                if (this.respectiveColumns[i].tabName == this.currentTypeName) {
-                    if (this.respectiveColumns[i].tabColumns.includes(val)) {
-                        return true;
+            try {
+                for (let i = 0; i < this.respectiveColumns.length; i++) {
+                    if (this.respectiveColumns[i].tabName === this.currentTypeName) {
+                        if (this.respectiveColumns[i].tabColumns.includes(val)) {
+                            return true;
+                        }
+                        return false;
                     }
-                    return false;
                 }
+            } catch (e) {
+                console.log(e);
             }
+
+            return false;
         },
         changeCurrentTab(val) {
             this.currentTypeName = val;
@@ -596,12 +616,62 @@ export default {
                 }
             })
             instance.get(this.url + 'ticket/' + type).then((response) => {
-                this.respectiveColumns.find(c => c.tabType === type).respectiveRows = JSON.parse(JSON.stringify(response.data));
-                console.log(this.respectiveColumns)
+                this.respectiveColumns.find(c => c.tabType === type).respectiveRows = response.data;
             }).catch((error) => {
                 console.log(error.response);
             })
+        },
+        async getUsers() {
+            var instance = axios.create({
+                headers: {
+                    'sessionId': this.$store.state.session,
+                    'token': this.$store.state.token
+                }
+            })
+            instance.get(this.url + 'user/').then((response) => {
+                this.users = response.data;
+            }).catch((error) => {
+                console.log(error.response);
+            })
+        },
+        deleteTicket() {
+            axios.delete(this.url + 'ticket/deleteTickets', {
+                headers: {
+                    'sessionId': this.$store.state.session,
+                    'token': this.$store.state.token
+                },
+                data: {
+                    'ticketsIds': this.ticketIdsSelected
+                }
+            }).then(() => {
+                for (var respectiveColumn of this.respectiveColumns) {
+                    this.getRespectiveRows(respectiveColumn.tabType)
+                }
+            }).then(() => {
+                this.showModal = false;
+                this.ticketIdsSelected = [];
+            });
+        },
+        restoreTicket() {
+            axios.patch(this.url + 'ticket/undeleteTickets',
+                {
+                    'ticketsIds': this.ticketIdsSelected
+                }, {
+                headers: {
+                    'sessionId': this.$store.state.session,
+                    'token': this.$store.state.token
+                }
+            }).then(() => {
+                for (var respectiveColumn of this.respectiveColumns) {
+                    this.getRespectiveRows(respectiveColumn.tabType)
+                }
+                this.ticketIdsSelected = [];
+
+            });
         }
+    },
+    created() {
+        this.getData();
     },
 
     setup() {
@@ -881,6 +951,7 @@ h5 {
 
 .button-39:hover {
     background-color: rgb(249, 250, 251);
+    z-index: 100;
 }
 
 .button-39:focus {
@@ -898,12 +969,15 @@ h5 {
     right: 10px;
     width: 400px;
     height: 200px;
-    z-index: -1;
     margin-right: 20px;
     display: flex;
     align-items: right;
     justify-content: end;
+    z-index: 0;
+}
 
+#top-right-elements:hover {
+    z-index: 2;
 }
 
 td#pop div.inline-block {
@@ -922,6 +996,10 @@ td#pop div.inline-block {
     padding-top: 10px;
     padding-left: 20px;
     padding-right: 20px;
+}
+
+.menu-component:hover {
+    cursor: pointer;
 }
 
 #popcontent-menu {
@@ -965,6 +1043,16 @@ td#pop div.inline-block {
     color: #FFFFFF;
     background-color: rgb(62, 109, 179);
     width: 130px;
+    border-radius: 5px;
+    font-weight: normal;
+    float: right;
+}
+
+#permanentlyDeleteButton {
+    color: #FFFFFF;
+    background-color: #CC3340;
+    border: none;
+    width: 220px;
     border-radius: 5px;
     font-weight: normal;
     float: right;
@@ -1081,7 +1169,6 @@ td#pop div.inline-block {
     width: 75%;
 }
 
-
 .svg-icon {
     width: 1em;
     height: 1em;
@@ -1151,62 +1238,12 @@ input[type=text] {
     font-weight: bold;
 }
 
-.dropbtn {
-    background-color: #ffffff;
-    color: rgb(0, 0, 0);
-    font-size: 12px;
-    border: 1px solid gray;
-    cursor: pointer;
-    height: 30px;
-    margin: auto;
-    text-align: left;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    width: 100%;
-}
-
-.dropdown {
-    display: inline-block;
-    width: 100%;
-}
-
-.dropdown-content {
-    position: absolute;
-    background-color: #ffffff;
-    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-    border-color: #888888;
-    z-index: 1;
-    max-width: 130px;
-    margin: 0px;
-}
-
 a {
     max-width: 100%;
     margin: 0px;
     height: 25px;
     border-bottom: 2px solid rgb(255, 255, 255);
     border-top: 2px solid rgb(255, 255, 255);
-}
-
-.dropdown-content a {
-    color: black;
-    text-decoration: none;
-    display: block;
-    width: 120px;
-    padding-left: 10px;
-    padding-top: 10px;
-    cursor: pointer;
-}
-
-.dropdown-content a:hover {
-    background-color: #c3d5da;
-    border-bottom: 2px solid rgb(113, 160, 212);
-    border-top: 2px solid rgb(113, 160, 212);
-}
-
-.dropdown:hover .dropbtn {
-    border-color: rgb(0, 60, 138);
-    background-color: white;
 }
 
 .down-arrow {

@@ -8,18 +8,18 @@ const store = createStore({
   state () {
     return {
         session: null,
-        token: null
+        token: null,
+        id: null
     }
   },
   mutations: {
     login(state,payload) {
         state.session = payload.id
         state.token = payload.token
+        state.id = payload.user.id
     }
   }
 })
-
-
 
 const app = createApp(App);
 app.use(router);
