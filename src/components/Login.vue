@@ -45,9 +45,9 @@ export default {
                     password: this.password
                 })
                 .then((response) => {
-                    this.$store.commit('login',response.data)
+                    this.$store.commit('login', response.data)
                     router.push({name: 'Tickets'})
-                    console.log(this.$store.state)
+                    // console.log(this.$store.state)
                 }).catch((error) => {
                     console.log(error.response)
                 })

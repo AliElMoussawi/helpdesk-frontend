@@ -6,9 +6,14 @@
 // import ViewTicket from "./components/viewTickets.vue";
 export default {
   name: 'App',
-  // created(){
-  //   this.$router.push("login")
-  // }
+  created(){
+    if(this.$store.state.session != null){
+      this.$router.push({name: 'Tickets'})
+    }
+    else{
+      this.$router.push({name: 'Login'})
+    }
+  }
 }
 </script>
 

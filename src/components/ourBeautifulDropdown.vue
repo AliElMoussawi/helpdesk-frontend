@@ -32,7 +32,7 @@ export default {
     background-color: #ffffff;
     color: rgb(0, 0, 0);
     font-size: 12px;
-    border: 1px solid gray;
+    border: 1px solid rgb(228, 227, 227);
     cursor: pointer;
     height: 30px;
     margin: auto;

@@ -17,7 +17,7 @@
                             <div class="menu-component">Give feedback</div>
                             <div class="menu-component">About</div>
                             <div class="menu-component">Privacy policy</div>
-                            <div class="menu-component">Sign out</div>
+                            <div class="menu-component" @click="signout()">Sign out</div>
                         </div>
                     </template>
                 </Popper>
@@ -31,10 +31,30 @@
 
 <script>
 import Popper from "vue3-popper";
-
+import axios from 'axios'
+import router from '../router'
 export default {
+    data(){
+        return{
+            url: 'http://192.168.3.25:8080/',
+        }
+    },
     components: {
         Popper
+    },
+    methods: {
+        async signout() {
+            var instance = axios.create({
+                headers: {
+                    'sessionId': this.$store.state.session,
+                    'token': this.$store.state.token
+                }
+            })
+            instance.get(this.url + 'auth/signOut').then(() => {
+                this.$store.commit('signout')
+                router.push({name: 'Login'})
+            })
+        }
     }
 }
 </script>

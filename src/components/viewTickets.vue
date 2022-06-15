@@ -62,7 +62,9 @@
                         v-show="this.ticketIdsSelected.length != 0 && this.currentTypeName == 'Deleted tickets'">˅</button>
                     <template #content>
                         <div id="popcontent-menu-edit2" v-show="this.ticketIdsSelected.length != 0">
-                            <div class="menu-component" @click="showModalDeleteForever = true">Delete {{ this.ticketIdsSelected.length }} ticket(s) forever
+                            <div class="menu-component" @click="showModalDeleteForever = true">Delete {{
+                                    this.ticketIdsSelected.length
+                            }} ticket(s) forever
                             </div>
                             <div class="menu-component" @click="restoreTicket()">Restore {{
                                     this.ticketIdsSelected.length
@@ -152,7 +154,7 @@
         </div>
     </div>
 
-    <ModalItem ref="modalName" id="modal">currentUserID
+    <ModalItem ref="modalName" id="modal">
         <template v-slot:header>
             <h4 id="popup-header">Update {{ this.ticketIdsSelected.length }} ticket(s)</h4>
         </template>
@@ -173,7 +175,8 @@
                             }} <span class="down-arrow">⯆</span></button>
                             <div class="dropdown-content-1" v-show="assigneeClicked === true">
                                 <a @click="changeAssignee('- No Change -')">- No Change -</a>
-                                <a @click="groupClicked === false ? groupClicked = true : groupClicked = false"><svg
+                                <a @click="groupClicked === false ? groupClicked = true : groupClicked = false">
+                                <svg
                                         id="groupOfPeople" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                         fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
                                         <path
@@ -201,13 +204,13 @@
                                     </svg>{{ this.getGroup(this.currentUserID) }}</a>
                                 <template v-for="user in getCurrentGroupUsers(this.getGroup(this.currentUserID))"
                                     :key="user.id">
-                                    <a @click="changeAssignee(this.getGroup(user.id) + '/' + user.name)"> <svg
+                                    <a @click="changeAssignee(this.getGroup(user.id) + '/' + user.userName)"> <svg
                                             style="margin-right: 5px;" xmlns="http://www.w3.org/2000/svg" width="16"
                                             height="16" fill="currentColor" class="bi bi-person-fill"
                                             viewBox="0 0 16 16">
                                             <path
                                                 d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-                                        </svg>{{ user.name }}</a>
+                                        </svg>{{ user.userName }}</a>
                                 </template>
                             </div>
                         </div>
@@ -246,16 +249,87 @@
                     <label for="subject">Subject</label>
                     <input type="text" id="subject" name="subject" value="- No Change -">
                     <br />
-                    <EmojiPicker picker-type="textarea" @select="onSelectEmoji" />
+                    <!-- <EmojiPicker picker-type="textarea" @select="onSelectEmoji" /> -->
+                    <div :class="{ note: noteActive }"
+                        style="border: 1px solid rgb(228, 227, 227); border-radius: 5px; height: 100%;">
+                        <div>
+                            <Popper placement="bottom" :show="showPopper">
+                                <button :class="{ note: noteActive }" id="reply-button"
+                                    @click="showPopper == true ? showPopper = false : showPopper = true"> <svg
+                                        v-show="this.buttonText == 'Public reply'"
+                                        style="display: inline-block; vertical-align: -0.125em; margin-right: 6px"
+                                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                        class="bi bi-arrow-90deg-left" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd"
+                                            d="M1.146 4.854a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H12.5A2.5 2.5 0 0 1 15 6.5v8a.5.5 0 0 1-1 0v-8A1.5 1.5 0 0 0 12.5 5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4z" />
+                                    </svg> <svg v-show="this.buttonText == 'Internal note'"
+                                        style="display: inline-block; vertical-align: -0.125em; margin-right: 6px"
+                                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                        class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                        <path
+                                            d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                        <path fill-rule="evenodd"
+                                            d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+                                    </svg>{{ this.buttonText }} <svg
+                                        style="display: inline-block; vertical-align: -0.125em;"
+                                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                        class="bi bi-chevron-compact-down" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd"
+                                            d="M1.553 6.776a.5.5 0 0 1 .67-.223L8 9.44l5.776-2.888a.5.5 0 1 1 .448.894l-6 3a.5.5 0 0 1-.448 0l-6-3a.5.5 0 0 1-.223-.67z" />
+                                    </svg></button>
+                                <template #content>
+                                    <div id="popcontent-menu-reply"
+                                        style="border: 1px solid rgb(228, 227, 227); border-radius: 5px;">
+                                        <div class="menu-component button-text" @click="setPublicReply()"
+                                            style="border-bottom: 1px solid rgb(228, 227, 227);"><svg
+                                                style="display: inline-block; vertical-align: -0.125em; margin-right: 6px"
+                                                xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" class="bi bi-arrow-90deg-left" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd"
+                                                    d="M1.146 4.854a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H12.5A2.5 2.5 0 0 1 15 6.5v8a.5.5 0 0 1-1 0v-8A1.5 1.5 0 0 0 12.5 5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4z" />
+                                            </svg>Public reply</div>
+                                        <div class="menu-component button-text" @click="setInternalNote()">
+                                            <svg style="display: inline-block; vertical-align: -0.125em; margin-right: 6px"
+                                                xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                                <path
+                                                    d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
+                                                <path fill-rule="evenodd"
+                                                    d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
+                                            </svg>Internal note
+                                        </div>
+                                    </div>
+                                </template>
+                            </Popper>
+                        </div>
+                        <div style="flex-grow: 2; margin-right: 4px; margin-bottom: 4px; margin-left: 10px;">
+                            <textarea id="textarea-typing" class="static" :class="{ note: noteActive }"
+                                rows="15"></textarea>
+                        </div>
+                    </div>
                 </div>
-
             </div>
         </template>
 
         <template v-slot:footer>
             <div id="buttons-right-popup">
                 <button class="button-39" id="submit-button">Submit</button>
-                <button class="button-39" id="menu-submit">˅</button>
+                <Popper>
+                    <button class="button-39" id="menu-submit">˅</button>
+                    <template #content>
+                        <div id="popcontent-menu3">
+                            <div class="menu-component wide">
+                                <div class='box red'></div>Submit as <strong>Open</strong>
+                            </div>
+                            <div class="menu-component wide">
+                                <div class='box blue'></div>Submit as <strong>Pending</strong>
+                            </div>
+                            <div class="menu-component wide">
+                                <div class='box gray'></div>Submit as <strong>Solved</strong>
+                            </div>
+                        </div>
+                    </template>
+                </Popper>
             </div>
         </template>
     </ModalItem>
@@ -276,7 +350,7 @@
         <p>This can't be undone.</p>
         <br />
         <div>
-            <button class="button-39" id="permanentlyDeleteButton" @click="deleteTicket()">Permanently delete
+            <button class="button-39" id="permanentlyDeleteButton" @click="permanentlyDeleteTicket()">Permanently delete
                 ticket(s)</button>
             <button class="button-39" id="cancelButton" @click="showModalDeleteForever = false">Cancel</button>
         </div>
@@ -299,14 +373,12 @@
 </template>
 
 <script>
-import usersData from '../assets/users_data.json';
 import ticketsData from '../assets/tickets_data.json';
-import groupsData from '../assets/groups_data.json';
 import Popper from "vue3-popper";
 import ModalItem from "./Modal.vue";
 import CollapseTransition from "./CollapseTransition.vue";
-import EmojiPicker from 'vue3-emoji-picker';
-import '../assets/emojipickerstyle.css'
+// import EmojiPicker from 'vue3-emoji-picker';
+// import '../assets/emojipickerstyle.css'
 import Vue3TagsInput from 'vue3-tags-input';
 import VueModal from '@kouts/vue-modal';
 import '@kouts/vue-modal/dist/vue-modal.css';
@@ -323,7 +395,7 @@ export default {
         Popper,
         ModalItem,
         CollapseTransition,
-        EmojiPicker,
+        // EmojiPicker,
         Vue3TagsInput,
         VueModal,
         Datepicker,
@@ -332,6 +404,7 @@ export default {
     },
     data() {
         return {
+            showPopper: false,
             url: 'http://192.168.3.25:8080/',
             showModalSpam: false,
             showModal: false, //for the deleteTicket
@@ -355,6 +428,8 @@ export default {
             currentTypeName: "Your unsolved tickets",
             currentIndex: 0,
             ticketIdsSelected: [],
+            buttonText: 'Public reply',
+            noteActive: false,
             allSelected: false,
             respectiveColumns: [
                 {
@@ -362,6 +437,7 @@ export default {
                     "tabType": "userUnSolvedTickets",
                     "tabColumns": ['Subject', 'Requester', 'Requested', 'Type', 'Priority'],
                     "respectiveRows": [],
+
                 },
                 {
                     "tabName": "Unassigned tickets",
@@ -445,7 +521,7 @@ export default {
             this.groupClicked = false;
         },
         getUserName(id) {
-            return this.users.find(u => u.id === id).name;
+            return this.users.find(u => u.id === id).username;
         },
         selectAll() {
             this.ticketIdsSelected = [];
@@ -546,27 +622,33 @@ export default {
         },
         getData() {
             setTimeout(function () { this.load = true; }.bind(this), 10);
+
             setTimeout(function () {
                 for (var respectiveColumn of this.respectiveColumns) {
                     this.getRespectiveRows(respectiveColumn.tabType)
                 }
-            }.bind(this), 3000);
+            }.bind(this), 500);
 
-            // setTimeout(function () { this.getUsers() }.bind(this), 3000);
-            setTimeout(function () { this.users = usersData; }.bind(this), 3000);
-            setTimeout(function () { this.tickets = ticketsData; }.bind(this), 3000);
-            setTimeout(function () { this.groups = groupsData; }.bind(this), 3000);
+            setTimeout(function () { this.tickets = ticketsData; }.bind(this), 500);
+            setTimeout(function () { this.getUsers() }.bind(this), 500);
+            setTimeout(function () { this.getGroups() }.bind(this), 500);
 
-            setTimeout(function () { this.load = false; }.bind(this), 3000);
-            console.log(this.currentUserID)
+            setTimeout(function () { this.load = false; }.bind(this), 500);
         },
         getCurrentGroupUsers(groupName) {
-            return this.groups.find(g => g.name == groupName).users;
+            return this.groups.find(g => g.name === groupName).user;
         },
         getGroup(id) {
-
-            // const group = this.respectiveColumns[this.currentIndex].respectiveRows.find(u => u.id === id).assignedGroup;
-            return this.users.find(u => u.id === id).group.group_name;
+            var name ='';
+            for(let i = 0; i<this.groups.length; i++){
+                for(let j = 0; j<this.groups[i].user.length; j++){
+                    if(this.groups[i].user[j].id == id){
+                        name = this.groups[i].name;
+                        return name;
+                    }
+                }
+            }
+            return name;
         },
         getDate(timestamp) {
             if (timestamp == null) {
@@ -608,6 +690,16 @@ export default {
             this.currentType = this.getTabTypeByName(this.currentTypeName);
             this.currentIndex = this.getIndexByName(this.currentTypeName);
         },
+        setPublicReply() {
+            this.buttonText = 'Public reply';
+            this.noteActive = false;
+            this.showPopper = false;
+        },
+        setInternalNote() {
+            this.buttonText = 'Internal note';
+            this.noteActive = true;
+            this.showPopper = false;
+        },
         async getRespectiveRows(type) {
             var instance = axios.create({
                 headers: {
@@ -617,6 +709,20 @@ export default {
             })
             instance.get(this.url + 'ticket/' + type).then((response) => {
                 this.respectiveColumns.find(c => c.tabType === type).respectiveRows = response.data;
+            }).catch((error) => {
+                console.log(error.response);
+            })
+        },
+        async getGroups() {
+            var instance = axios.create({
+                headers: {
+                    'sessionId': this.$store.state.session,
+                    'token': this.$store.state.token
+                }
+            })
+            instance.get(this.url + 'group').then((response) => {
+                this.groups = response.data;
+                console.log(this.groups)
             }).catch((error) => {
                 console.log(error.response);
             })
@@ -651,6 +757,23 @@ export default {
                 this.showModal = false;
                 this.ticketIdsSelected = [];
             });
+        },
+        permanentlyDeleteTicket() {
+            axios.delete(this.url + 'ticket/deleteTicketsForever', {
+                headers: {
+                    'sessionId': this.$store.state.session,
+                    'token': this.$store.state.token
+                },
+                data: {
+                    'ticketsIds': this.ticketIdsSelected
+                }
+            }).then(() => {
+                for (var respectiveColumn of this.respectiveColumns) {
+                    this.getRespectiveRows(respectiveColumn.tabType)
+                }
+                this.showModalDeleteForever = false;
+                this.ticketIdsSelected = [];
+            })
         },
         restoreTicket() {
             axios.patch(this.url + 'ticket/undeleteTickets',
@@ -773,6 +896,23 @@ tr:hover {
     padding-top: 12px;
     padding-bottom: 12px;
     text-align: left;
+}
+
+#textarea-typing {
+    border: none;
+    resize: none;
+    width: 100%;
+    outline: none;
+    overflow-y: scroll;
+    height: 100%;
+}
+
+.note {
+    background-color: #fff4d7;
+}
+
+.note:hover {
+    background-color: #fff4d7;
 }
 
 #header:hover {
@@ -996,10 +1136,19 @@ td#pop div.inline-block {
     padding-top: 10px;
     padding-left: 20px;
     padding-right: 20px;
+    background-color: white;
 }
 
 .menu-component:hover {
     cursor: pointer;
+}
+
+#popcontent-menu3 {
+    background: rgb(255, 255, 255);
+    padding-top: 5px;
+    border: 1px solid rgb(233, 230, 230);
+    border-radius: 10px;
+    margin-right: 100px;
 }
 
 #popcontent-menu {
@@ -1010,6 +1159,7 @@ td#pop div.inline-block {
     border-radius: 10px;
 }
 
+#popcontent-mneu3 :hover,
 #popcontent-menu :hover {
     background-color: aliceblue;
 }
@@ -1107,6 +1257,10 @@ td#pop div.inline-block {
     border-color: rgb(91, 94, 94);
 }
 
+#reply-button:hover {
+    background-color: transparent;
+}
+
 #menu-submit {
     width: 40px;
     margin-left: 1px;
@@ -1197,6 +1351,10 @@ td#pop div.inline-block {
     padding-top: 20px;
 }
 
+.wide {
+    width: 155px;
+}
+
 #numTickets {
     float: right;
 }
@@ -1259,7 +1417,7 @@ a {
     background-color: #ffffff;
     color: rgb(0, 0, 0);
     font-size: 12px;
-    border: 1px solid gray;
+    border: 1px solid rgb(228, 227, 227);
     cursor: pointer;
     height: 30px;
     margin: auto;
@@ -1321,6 +1479,29 @@ a {
 
 #link-style:hover {
     text-decoration: underline;
+}
+
+.box {
+    border-radius: 5px;
+    height: 15px;
+    width: 15px;
+    clear: both;
+    border: none;
+    display: inline-block;
+    vertical-align: -0.125em;
+    margin-right: 6px;
+}
+
+.red {
+    background-color: red;
+}
+
+.blue {
+    background-color: rgb(0, 132, 255);
+}
+
+.gray {
+    background-color: gray;
 }
 </style>
 <style>
