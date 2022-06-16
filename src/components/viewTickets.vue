@@ -2,23 +2,15 @@
     <TheNavigation />
     <div class="p-10">
         <div id="collapse-left" v-show="!isOpen">
-            <button class="collapse" @click="isOpen = !isOpen">
-                <svg class="svg-icon" viewBox="0 0 20 20">
-                    <path fill="none"
-                        d="M11.611,10.049l-4.76-4.873c-0.303-0.31-0.297-0.804,0.012-1.105c0.309-0.304,0.803-0.293,1.105,0.012l5.306,5.433c0.304,0.31,0.296,0.805-0.012,1.105L7.83,15.928c-0.152,0.148-0.35,0.223-0.547,0.223c-0.203,0-0.406-0.08-0.559-0.236c-0.303-0.309-0.295-0.803,0.012-1.104L11.611,10.049z">
-                    </path>
-                </svg>
+            <button style="margin-left:10px;" class="collapse" @click="isOpen = !isOpen">
+                <svgMain name="expandArrow" />
             </button>
         </div>
         <CollapseTransition dimension="width" :duration="500">
             <div class="tab-container" v-show="isOpen">
                 <div class="views-title">
                     <button class="collapse" @click="isOpen = !isOpen">
-                        <svg class="svg-icon" viewBox="0 0 20 20">
-                            <path fill="none"
-                                d="M8.388,10.049l4.76-4.873c0.303-0.31,0.297-0.804-0.012-1.105c-0.309-0.304-0.803-0.293-1.105,0.012L6.726,9.516c-0.303,0.31-0.296,0.805,0.012,1.105l5.433,5.307c0.152,0.148,0.35,0.223,0.547,0.223c0.203,0,0.406-0.08,0.559-0.236c0.303-0.309,0.295-0.803-0.012-1.104L8.388,10.049z">
-                            </path>
-                        </svg>
+                        <svgMain name="collapseArrow" />
                     </button>
                     <p id="views">Views</p>
                 </div>
@@ -176,41 +168,26 @@
                             <div class="dropdown-content-1" v-show="assigneeClicked === true">
                                 <a @click="changeAssignee('- No Change -')">- No Change -</a>
                                 <a @click="groupClicked === false ? groupClicked = true : groupClicked = false">
-                                <svg
-                                        id="groupOfPeople" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                        fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
-                                        <path
-                                            d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-                                        <path fill-rule="evenodd"
-                                            d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z" />
-                                        <path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
-                                    </svg>{{ this.getGroup(this.currentUserID) }} <svg id="expand-arrow"
-                                        class="svg-icon" viewBox="0 0 20 20">
-                                        <path fill="none"
-                                            d="M14.989,9.491L6.071,0.537C5.78,0.246,5.308,0.244,5.017,0.535c-0.294,0.29-0.294,0.763-0.003,1.054l8.394,8.428L5.014,18.41c-0.291,0.291-0.291,0.763,0,1.054c0.146,0.146,0.335,0.218,0.527,0.218c0.19,0,0.382-0.073,0.527-0.218l8.918-8.919C15.277,10.254,15.277,9.784,14.989,9.491z">
-                                        </path>
-                                    </svg></a>
+                                    <svgMain name="groupOfPeople" />
+                                    {{ this.getGroup(this.currentUserID) }}
+                                    <div style="float: right; margin-right: 8px;">
+                                        <svgMain name="expandArrow" />
+                                    </div>
+                                </a>
                             </div>
                             <div class="dropdown-content-1" v-show="groupClicked === true">
                                 <a @click="groupClicked = false">Back</a>
-                                <a @click="changeAssignee(this.getGroup(this.currentUserID))"><svg
-                                        style="margin-right: 5px;" xmlns="http://www.w3.org/2000/svg" width="16"
-                                        height="16" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
-                                        <path
-                                            d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-                                        <path fill-rule="evenodd"
-                                            d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z" />
-                                        <path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
-                                    </svg>{{ this.getGroup(this.currentUserID) }}</a>
+                                <a @click="changeAssignee(this.getGroup(this.currentUserID))">
+                                    <svgMain name="groupOfPeople" />
+                                    {{ this.getGroup(this.currentUserID) }}
+                                </a>
                                 <template v-for="user in getCurrentGroupUsers(this.getGroup(this.currentUserID))"
                                     :key="user.id">
-                                    <a @click="changeAssignee(this.getGroup(user.id) + '/' + user.userName)"> <svg
-                                            style="margin-right: 5px;" xmlns="http://www.w3.org/2000/svg" width="16"
-                                            height="16" fill="currentColor" class="bi bi-person-fill"
-                                            viewBox="0 0 16 16">
-                                            <path
-                                                d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-                                        </svg>{{ user.userName }}</a>
+                                    <a @click="changeAssignee(this.getGroup(user.id) + '/' + user.userName)">
+                                        <div style="margin-right: 5px;"></div>
+                                        <svgMain name="personFill" />
+                                        {{ user.userName }}
+                                    </a>
                                 </template>
                             </div>
                         </div>
@@ -255,48 +232,23 @@
                         <div>
                             <Popper placement="bottom" :show="showPopper">
                                 <button :class="{ note: noteActive }" id="reply-button"
-                                    @click="showPopper == true ? showPopper = false : showPopper = true"> <svg
-                                        v-show="this.buttonText == 'Public reply'"
-                                        style="display: inline-block; vertical-align: -0.125em; margin-right: 6px"
-                                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                        class="bi bi-arrow-90deg-left" viewBox="0 0 16 16">
-                                        <path fill-rule="evenodd"
-                                            d="M1.146 4.854a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H12.5A2.5 2.5 0 0 1 15 6.5v8a.5.5 0 0 1-1 0v-8A1.5 1.5 0 0 0 12.5 5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4z" />
-                                    </svg> <svg v-show="this.buttonText == 'Internal note'"
-                                        style="display: inline-block; vertical-align: -0.125em; margin-right: 6px"
-                                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                        class="bi bi-pencil-square" viewBox="0 0 16 16">
-                                        <path
-                                            d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
-                                        <path fill-rule="evenodd"
-                                            d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
-                                    </svg>{{ this.buttonText }} <svg
-                                        style="display: inline-block; vertical-align: -0.125em;"
-                                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                        class="bi bi-chevron-compact-down" viewBox="0 0 16 16">
-                                        <path fill-rule="evenodd"
-                                            d="M1.553 6.776a.5.5 0 0 1 .67-.223L8 9.44l5.776-2.888a.5.5 0 1 1 .448.894l-6 3a.5.5 0 0 1-.448 0l-6-3a.5.5 0 0 1-.223-.67z" />
-                                    </svg></button>
+                                    @click="showPopper == true ? showPopper = false : showPopper = true">
+                                    <svgMain v-if="this.buttonText == 'Public reply'" name="arrowLeft" />
+                                    <svgMain v-if="this.buttonText == 'Internal note'" name="pencilNote" />
+                                    {{ this.buttonText }}
+                                    <svgMain name="arrowHeadBottom" />
+                                </button>
                                 <template #content>
                                     <div id="popcontent-menu-reply"
                                         style="border: 1px solid rgb(228, 227, 227); border-radius: 5px;">
                                         <div class="menu-component button-text" @click="setPublicReply()"
-                                            style="border-bottom: 1px solid rgb(228, 227, 227);"><svg
-                                                style="display: inline-block; vertical-align: -0.125em; margin-right: 6px"
-                                                xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                fill="currentColor" class="bi bi-arrow-90deg-left" viewBox="0 0 16 16">
-                                                <path fill-rule="evenodd"
-                                                    d="M1.146 4.854a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H12.5A2.5 2.5 0 0 1 15 6.5v8a.5.5 0 0 1-1 0v-8A1.5 1.5 0 0 0 12.5 5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4z" />
-                                            </svg>Public reply</div>
+                                            style="border-bottom: 1px solid rgb(228, 227, 227);">
+                                            <svgMain name="arrowLeft" />
+                                            Public reply
+                                        </div>
                                         <div class="menu-component button-text" @click="setInternalNote()">
-                                            <svg style="display: inline-block; vertical-align: -0.125em; margin-right: 6px"
-                                                xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                                                <path
-                                                    d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
-                                                <path fill-rule="evenodd"
-                                                    d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
-                                            </svg>Internal note
+                                            <svgMain name="pencilNote" />
+                                            Internal note
                                         </div>
                                     </div>
                                 </template>
@@ -373,6 +325,8 @@
 </template>
 
 <script>
+
+import svgMain from './svgMain.vue'
 import ticketsData from '../assets/tickets_data.json';
 import Popper from "vue3-popper";
 import ModalItem from "./Modal.vue";
@@ -389,6 +343,7 @@ import axios from 'axios'
 import TheNavigation from './TheNavigation.vue';
 import DropDown from './ourBeautifulDropdown.vue'
 
+
 export default {
     name: 'ViewTicket',
     components: {
@@ -401,6 +356,7 @@ export default {
         Datepicker,
         TheNavigation,
         DropDown,
+        svgMain
     },
     data() {
         return {
@@ -621,6 +577,7 @@ export default {
             }
         },
         getData() {
+            console.log()
             setTimeout(function () { this.load = true; }.bind(this), 10);
 
             setTimeout(function () {
@@ -639,10 +596,10 @@ export default {
             return this.groups.find(g => g.name === groupName).user;
         },
         getGroup(id) {
-            var name ='';
-            for(let i = 0; i<this.groups.length; i++){
-                for(let j = 0; j<this.groups[i].user.length; j++){
-                    if(this.groups[i].user[j].id == id){
+            var name = '';
+            for (let i = 0; i < this.groups.length; i++) {
+                for (let j = 0; j < this.groups[i].user.length; j++) {
+                    if (this.groups[i].user[j].id == id) {
                         name = this.groups[i].name;
                         return name;
                     }
@@ -1323,21 +1280,6 @@ td#pop div.inline-block {
     width: 75%;
 }
 
-.svg-icon {
-    width: 1em;
-    height: 1em;
-}
-
-.svg-icon path,
-.svg-icon polygon,
-.svg-icon rect {
-    fill: #727171;
-}
-
-.svg-icon circle {
-    stroke: #727171;
-    stroke-width: 1;
-}
 
 .collapse {
     float: right;
@@ -1408,10 +1350,7 @@ a {
     float: right;
 }
 
-#expand-arrow {
-    float: right;
-    margin-right: 8px;
-}
+
 
 .dropbtn-1 {
     background-color: #ffffff;
@@ -1461,10 +1400,6 @@ a {
 .dropdown-1:hover .dropbtn-1 {
     border-color: rgb(0, 60, 138);
     background-color: white;
-}
-
-#groupOfPeople {
-    margin-right: 5px;
 }
 
 #priority-choose {
@@ -1547,5 +1482,21 @@ a {
     display: inline-block;
     font-size: 14px;
     font-weight: bold;
+}
+
+.svg-icon {
+    width: 1em;
+    height: 1em;
+}
+
+.svg-icon path,
+.svg-icon polygon,
+.svg-icon rect {
+    fill: #727171;
+}
+
+.svg-icon circle {
+    stroke: #727171;
+    stroke-width: 1;
 }
 </style> 

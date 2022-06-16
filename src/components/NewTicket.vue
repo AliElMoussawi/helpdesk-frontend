@@ -12,14 +12,13 @@
                 <input type="text" class="icon" placeholder="search name or contact info" v-model="search" autofocus
                     v-on:focusout="delay()" v-on:focus="showAddUser = true">
                 <div class="dropdown-content-1" v-if="showAddUser">
-                    <div v-for="(item, index) in filteredUsers" :key="index" v-show="search.length != 0">
+                    <div v-for="(item, index) in filteredUsers" :key="index" v-show="search.length != 0"
+                        style="border: 1px solid rgb(230, 230, 230)">
                         <div class="filteredAllUsers">
                             <div style="display: flex; flex-direction: row">
-                                <button id="user-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                        fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
-                                        <path
-                                            d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-                                    </svg></button>
+                                <button id="user-button">
+                                    <svgMain name="personFill"/>
+                                </button>
                                 <div @click="search = item.userName">
                                     <div class="info">{{ item.userName }}</div>
                                     <div class="info" id="email">{{ item.email }}</div>
@@ -32,15 +31,30 @@
 
                 </div>
                 <span class="text-modal">Assignee</span>
-                <span class="text-modal">Followers <svg
-                        style="display: inline-block; vertical-align: -0.125em; margin-left: 5px"
-                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                        class="bi bi-info-circle" viewBox="0 0 16 16">
-                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
-                        <path
-                            d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
-                    </svg></span>
-                <div id="tags-container">
+                <span class="text-modal">Followers
+                    <svgMain name="infoIcon" />
+                </span>
+                <input type="text" class="icon" placeholder="search agents" v-model="searchAgents" autofocus
+                    v-on:focusout="setAgent()" v-on:focus="showAgents = true">
+                <div class="dropdown-content-1" v-show="searchAgents.length != 0 && showAgents == true"
+                    style="border: 1px solid rgb(230, 230, 230)">
+                    <div v-for="(item, index) in filteredAgents" :key="index">
+                        <div class="filteredAllAgents">
+                            <div @click="searchAgents = item.userName">
+                                <div style="display: flex; flex-direction: row">
+                                    <button id="user-button">
+                                        <svgMain name="personFill"/>
+                                    </button>
+                                    <div>
+                                        <div class="info">{{ item.userName }}</div>
+                                        <div class="info" id="email">{{ item.email }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="tags-container" style="margin-top: 10px;">
                     <span class="text-modal" style="margin-top: 0px;">Tags</span>
                     <div id="tags">
                         <vue3-tags-input :tags="tagsToAdd" placeholder="input tags"
@@ -57,47 +71,22 @@
                     :class="{ note: noteActive }">
                     <div>
                         <Popper placement="top">
-                            <button class="button-39" :class="{ note: noteActive }" id="reply-button"> <svg
-                                    v-show="this.buttonText == 'Public reply'"
-                                    style="display: inline-block; vertical-align: -0.125em; margin-right: 6px"
-                                    xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                    class="bi bi-arrow-90deg-left" viewBox="0 0 16 16">
-                                    <path fill-rule="evenodd"
-                                        d="M1.146 4.854a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H12.5A2.5 2.5 0 0 1 15 6.5v8a.5.5 0 0 1-1 0v-8A1.5 1.5 0 0 0 12.5 5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4z" />
-                                </svg> <svg v-show="this.buttonText == 'Internal note'"
-                                    style="display: inline-block; vertical-align: -0.125em; margin-right: 6px"
-                                    xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                    class="bi bi-pencil-square" viewBox="0 0 16 16">
-                                    <path
-                                        d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
-                                    <path fill-rule="evenodd"
-                                        d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
-                                </svg>{{ this.buttonText }} <svg
-                                    style="display: inline-block; vertical-align: -0.125em;"
-                                    xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                    class="bi bi-chevron-compact-down" viewBox="0 0 16 16">
-                                    <path fill-rule="evenodd"
-                                        d="M1.553 6.776a.5.5 0 0 1 .67-.223L8 9.44l5.776-2.888a.5.5 0 1 1 .448.894l-6 3a.5.5 0 0 1-.448 0l-6-3a.5.5 0 0 1-.223-.67z" />
-                                </svg></button>
+                            <button class="button-39" :class="{ note: noteActive }" id="reply-button">
+                                <svgMain v-if="this.buttonText == 'Public reply'" name="arrowLeft" />
+                                <svgMain v-if="this.buttonText == 'Internal note'" name="pencilNote" />
+                                {{ this.buttonText }}
+                                <svgMain name="arrowHeadBottom" />
+                            </button>
                             <template #content>
                                 <div id="popcontent-menu-reply">
                                     <div class="menu-component button-text" @click="setPublicReply()"
-                                        style="border-bottom: 1px solid rgb(228, 227, 227);"><svg
-                                            style="display: inline-block; vertical-align: -0.125em; margin-right: 6px"
-                                            xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                            fill="currentColor" class="bi bi-arrow-90deg-left" viewBox="0 0 16 16">
-                                            <path fill-rule="evenodd"
-                                                d="M1.146 4.854a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H12.5A2.5 2.5 0 0 1 15 6.5v8a.5.5 0 0 1-1 0v-8A1.5 1.5 0 0 0 12.5 5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4z" />
-                                        </svg>Public reply</div>
+                                        style="border-bottom: 1px solid rgb(228, 227, 227);">
+                                        <svgMain name="arrowLeft" />
+                                        Public reply
+                                    </div>
                                     <div class="menu-component button-text" @click="setInternalNote()">
-                                        <svg style="display: inline-block; vertical-align: -0.125em; margin-right: 6px"
-                                            xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                            fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                                            <path
-                                                d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z" />
-                                            <path fill-rule="evenodd"
-                                                d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
-                                        </svg>Internal note
+                                        <svgMain name="pencilNote" />
+                                        Internal note
                                     </div>
                                 </div>
                             </template>
@@ -110,11 +99,9 @@
             </div>
             <div class="child3">
                 <div style="border-bottom: 1px solid rgb(228, 227, 227);">
-                    <button id="person-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                            fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
-                            <path
-                                d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z" />
-                        </svg></button>
+                    <button id="person-button">
+                        <svgMain name="personTransparent"/>
+                    </button>
                 </div>
             </div>
         </div>
@@ -162,26 +149,45 @@
             </div>
 
             <div v-show="this.selectedUserType == 'staff-member'">
-                <div class="text-modal" >Role</div>
-
+                <div class="text-modal">Role</div>
                 <div>
-                    <Popper placement="top" style="width: 100%;">
-                        <div id="staff-type">{{ chosenStaffType }}</div>
-                        <template #content>
-                            <div id="popcontent-menu-user-type">
-                                <div class="menu-component">
-                                    Agent
-                                </div>
-                                <div class="menu-component">
-                                    Administrator
-                                </div>
-                                <div class="menu-component">
-                                    Light Agent
+
+                    <div v-show="showMenu" id="staff-menu">
+                        <div class="menu-component" @click="changeStaffType('Agent')"
+                            style="display:flex;flex-direction:row;padding-left: 5px;">
+                            <div style="min-width:16px;margin-right: 5px;">
+                                <div v-show="chosenStaffType == 'Agent'">
+                                    <svgMain name="tickIcon" />
                                 </div>
                             </div>
-                        </template>
-                    </Popper>
+                            Agent
+                        </div>
+                        <div class="menu-component" @click="changeStaffType('Administrator')"
+                            style="display:flex;flex-direction:row;padding-left: 5px;">
+                            <div style="min-width:16px; margin-right: 5px;">
+                                <div v-show="chosenStaffType == 'Administrator'">
+                                    <svgMain name="tickIcon" />
+                                </div>
+
+                            </div>
+                            Administrator
+                        </div>
+                        <div class="menu-component" @click="changeStaffType('Light Agent')"
+                            style="display:flex;flex-direction:row;padding-left: 5px;">
+                            <div style="min-width:16px; margin-right: 5px;">
+                                <div v-show="chosenStaffType == 'Light agent'">
+                                    <svgMain name="tickIcon" />
+                                </div>
+
+                            </div>
+                            Light Agent
+                        </div>
+                    </div>
                 </div>
+                <div id="staff-type" @click="showMenu == true ? showMenu = false : showMenu = true">{{ chosenStaffType
+                }}
+                </div>
+
             </div>
 
 
@@ -203,6 +209,7 @@ import Vue3TagsInput from 'vue3-tags-input';
 import Popper from "vue3-popper";
 import VueModal from '@kouts/vue-modal';
 import axios from 'axios';
+import svgMain from './svgMain.vue'
 
 export default {
     name: 'NewTicket',
@@ -220,7 +227,10 @@ export default {
             newUserName: '',
             newUserEmail: '',
             selectedUserType: 'end-user',
-            chosenStaffType: 'Light agent'
+            chosenStaffType: 'Light agent',
+            showMenu: false,
+            searchAgents: '',
+            showAgents: false,
         }
     },
     components: {
@@ -228,6 +238,7 @@ export default {
         Vue3TagsInput,
         Popper,
         VueModal,
+        svgMain
     },
     methods: {
         delay() {
@@ -237,6 +248,16 @@ export default {
             setTimeout(() => {
                 if (this.allUsers.find(g => g.userName === this.search) == undefined) {
                     this.search = ''
+                }
+            }, 130)
+        },
+        setAgent() {
+            setTimeout(() => {
+                this.showAgents = false;
+            }, 120)
+            setTimeout(() => {
+                if (this.agents.find(g => g.userName === this.Agents) == undefined) {
+                    this.Agents = ''
                 }
             }, 130)
         },
@@ -283,6 +304,10 @@ export default {
         },
         radioChange(val) {
             this.selectedUserType = val;
+        },
+        changeStaffType(val) {
+            this.chosenStaffType = val;
+            this.showMenu == true ? this.showMenu = false : this.showMenu = true;
         }
     },
     created() {
@@ -292,6 +317,11 @@ export default {
         filteredUsers() {
             return this.allUsers.filter(item => {
                 return ((item.userName.toLowerCase().indexOf(this.search.toLowerCase()) > -1) || (item.email.toLowerCase().indexOf(this.search.toLowerCase()) > -1))
+            })
+        },
+        filteredAgents() {
+            return this.agents.filter(item => {
+                return ((item.userName.toLowerCase().indexOf(this.searchAgents.toLowerCase()) > -1) || (item.email.toLowerCase().indexOf(this.searchAgents.toLowerCase()) > -1))
             })
         }
     },
@@ -605,7 +635,6 @@ header[data-v-128f56e5] {
 }
 
 .dropdown-content-1 {
-    border: 1px solid rgb(230, 230, 230);
     border-radius: 5px;
     margin-right: 15px;
     margin-left: 15px;
@@ -633,7 +662,7 @@ header[data-v-128f56e5] {
     z-index: 5;
 }
 
-
+.filteredAllAgents,
 .filteredAllUsers {
     background-color: #FFFFFF;
     height: 33px;
@@ -650,6 +679,7 @@ header[data-v-128f56e5] {
     padding-bottom: 10px;
 }
 
+.filteredAllAgents:hover,
 .filteredAllUsers:hover {
     background-color: #e3f0f3;
     border-bottom: 3px solid rgb(146, 179, 216);
@@ -760,16 +790,23 @@ header[data-v-128f56e5] {
     border-radius: 5px;
 }
 
-#popcontent-menu-user-type {
-    /* margin-left: 15px; */
-}
 
-#staff-type{
+
+#staff-type {
     border: 1px solid rgb(230, 230, 230);
     height: 24px;
     padding-left: 15px;
     margin-left: 15px;
     padding-top: 5px;
+    border-radius: 5px;
+}
+
+#staff-menu {
+    border: 1px solid rgb(230, 230, 230);
+    margin-left: 14px;
+    position: absolute;
+    top: 210px;
+    width: calc(100% - 60px);
     border-radius: 5px;
 }
 </style>

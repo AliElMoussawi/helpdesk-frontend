@@ -3,12 +3,11 @@
         <nav>
             <div>
                 <Popper>
-                    <button id="user-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                            fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
-                            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-                        </svg></button>
+                    <button id="user-button">
+                        <svgMain name="personFill" />
+                    </button>
                     <template #content>
-                        <div id="popcontent-menu" >
+                        <div id="popcontent-menu">
                             <div class="menu-component">Product updates</div>
                             <div class="menu-component">Get help</div>
                             <div class="menu-component">Support help center</div>
@@ -33,14 +32,16 @@
 import Popper from "vue3-popper";
 import axios from 'axios'
 import router from '../router'
+import svgMain from  './svgMain.vue'
 export default {
-    data(){
-        return{
+    data() {
+        return {
             url: 'http://192.168.3.25:8080/',
         }
     },
     components: {
-        Popper
+        Popper,
+        svgMain,
     },
     methods: {
         async signout() {
@@ -52,7 +53,7 @@ export default {
             })
             instance.get(this.url + 'auth/signOut').then(() => {
                 this.$store.commit('signout')
-                router.push({name: 'Login'})
+                router.push({ name: 'Login' })
             })
         }
     }
@@ -111,7 +112,7 @@ header nav {
     padding-right: 20px;
 }
 
-#add-button{ 
+#add-button {
     border: none;
     background: none;
     padding-left: 10px;
@@ -121,8 +122,7 @@ header nav {
     text-decoration: none;
 }
 
-#add-button:hover{ 
+#add-button:hover {
     cursor: pointer;
 }
-
 </style>
