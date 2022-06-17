@@ -22,7 +22,7 @@
                 </Popper>
             </div>
         </nav>
-        <div>
+        <div >
             <router-link id="add-button" to="/newTicket"> + Add </router-link>
         </div>
     </header>
@@ -125,4 +125,5 @@ header nav {
 #add-button:hover {
     cursor: pointer;
 }
+
 </style>

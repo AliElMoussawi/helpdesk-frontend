@@ -40,7 +40,9 @@
                 <div class="dropdown-1">
                     <button class="dropbtn-1" @click="toggleAssigneePanel()">{{
                             this.chosenAssignee
-                    }} <span class="down-arrow" style="margin-right: 8px"><svgMain name="arrowHeadBottom"/></span></button>
+                    }} <span class="down-arrow" style="margin-right: 8px">
+                            <svgMain name="arrowHeadBottom" />
+                        </span></button>
                     <div class="dropdown-content expanded" v-show="assigneeClicked === true" id="drop-down">
                         <a id="groupsTitle">Groups</a>
                         <a @click="groupClicked === false ? groupClicked = true : groupClicked = false">
@@ -52,7 +54,11 @@
                         </a>
                     </div>
                     <div class="dropdown-content expanded" v-show="groupClicked === true" id="sub-drop-down">
-                        <a @click="groupClicked = false"> <div style="display: inline-block; vertical-align: -0.125em;"><svgMain name="collapseArrow"/> </div>Groups</a>
+                        <a @click="groupClicked = false">
+                            <div style="display: inline-block; vertical-align: -0.125em;">
+                                <svgMain name="collapseArrow" />
+                            </div>Groups
+                        </a>
                         <a @click="changeAssignee(this.getGroup(this.currentUserID))">
                             <svgMain name="groupOfPeople" />
                             {{ this.getGroup(this.currentUserID) }}
@@ -229,7 +235,7 @@
 
             <br />
             <div>
-                <button class="button-39" id="addButton">Add</button>
+                <button class="button-39" id="addButton" @click="addNewUser()">Add</button>
                 <button class="button-39" id="cancelButton" @click="showModal = false">Cancel</button>
             </div>
             <br />
@@ -272,6 +278,25 @@ export default {
             chosenAssignee: "-",
             groups: [],
             currentUserID: this.$store.state.id,
+            newUserRole: 1,
+            roles: [
+                {
+                    name: 'End User',
+                    id: 1
+                },
+                {
+                    name: 'Agent',
+                    id: 2
+                },
+                {
+                    name: 'Administrator',
+                    id: 3
+                },
+                {
+                    name: 'Light Agent',
+                    id: 4
+                }
+            ]
         }
     },
     components: {
@@ -346,9 +371,16 @@ export default {
         },
         radioChange(val) {
             this.selectedUserType = val;
+            if (val == 'Staff member') {
+                this.newUserRole = this.roles.find(r => r.name == this.chosenStaffType).id;
+            } else {
+                this.newUserRole = 1;
+            }
+
         },
         changeStaffType(val) {
             this.chosenStaffType = val;
+            this.newUserRole = this.roles.find(r => r.name == this.chosenStaffType).id;
             this.showMenu == true ? this.showMenu = false : this.showMenu = true;
         },
         changeAssignee(newAssignee) {
@@ -392,6 +424,28 @@ export default {
         getCurrentGroupUsers(groupName) {
             return this.groups.find(g => g.name === groupName).user;
         },
+        addNewUser() {
+            axios
+                .post(this.url + 'user/', {
+                    username: this.newUserName,
+                    email: this.newUserEmail,
+                    category: this.newUserRole
+                }, {
+                    headers: {
+                        'sessionId': this.$store.state.session,
+                        'token': this.$store.state.token
+                    }
+                })
+                .then(() => {
+                    this.newUserName = '';
+                    this.newUserEmail = '';
+                    this.newUserRole = 1;
+                    this.showModal = false;
+                    this.getData();
+                }).catch((error) => {
+                    console.log(error.response)
+                })
+        }
     },
     created() {
         this.getData();
@@ -893,6 +947,7 @@ header[data-v-128f56e5] {
 #groupsTitle:hover {
     background-color: white !important;
 }
+
 #staff-type {
     border: 1px solid rgb(230, 230, 230);
     height: 24px;

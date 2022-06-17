@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <div id="title">
-            <h1 id="text-title">zendesk</h1>
+            <h1 id="text-title">helpdesk</h1>
         </div>
         <div id="box-container">
             <div class="box">

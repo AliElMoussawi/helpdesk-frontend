@@ -12,9 +12,9 @@
 <script>
 export default {
     data() {
-        return{
-        chosenWord: '- No Change -',
-        WordClicked: false,
+        return {
+            chosenWord: '- No Change -',
+            WordClicked: false,
         }
     },
     props: ['options'],
@@ -22,6 +22,7 @@ export default {
         changeWord(newWord) {
             this.WordClicked === false ? this.WordClicked = true : this.WordClicked = false;
             this.chosenWord = newWord;
+            this.$emit('chosenType', newWord);
         }
     }
 }
@@ -90,5 +91,4 @@ a {
 .down-arrow {
     float: right;
 }
-
 </style>

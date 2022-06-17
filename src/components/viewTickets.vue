@@ -1,5 +1,6 @@
 <template>
     <TheNavigation />
+
     <div class="p-10">
         <div id="collapse-left" v-show="!isOpen">
             <button style="margin-left:10px;" class="collapse" @click="isOpen = !isOpen">
@@ -106,15 +107,15 @@
                                 <template #content>
                                     <div id="popcontent">
                                         <div id="content-header">
-                                            <div class="open-badge">OPEN</div>
-                                            <div>{{ ticket.type }} ({{ ticket.priority }})</div>
+                                            <div class="open-badge">{{ticket.status.status}}</div>
+                                            <div>{{ ticket.ticketType.name }} ({{ ticket.priority.name }})</div>
                                         </div>
                                         <br />
                                         <div><strong>{{ ticket.subject }}</strong></div>
                                         <br />
-                                        <div>Hey there, I am sending this email beacuse I am having a problem with
+                                        <div>Hey there, I am having a problem with
                                             setting up my account.
-                                            Please help me fix it. Thanks.</div>
+                                            Please help me troubleshoot the issue. Thanks.</div>
                                     </div>
                                 </template>
                             </Popper>
@@ -207,7 +208,7 @@
                             <div class="type">
                                 <span class="text-modal">Type</span>
                                 <br />
-                                <DropDown :options="this.typeOptions"></DropDown>
+                                <DropDown :options="this.typeOptions" @chosenType="getTicketType"></DropDown>
                             </div>
                             <div class="type" id="priority-choose">
                                 <span class="text-modal">Priority</span>
@@ -216,10 +217,10 @@
                             </div>
                         </div>
                         <br v-show="chosenType == 'Task'" />
-                        <span class="text-modal" v-show="chosenType == 'Task'">Due Date</span>
+                        <span class="text-modal" v-show="this.chosenType == 'Task'">Due Date</span>
                         <Datepicker v-model="date" :enableTimePicker="false" weekStart="0" :format="format"
                             :previewFormat="format" placeholder="Select date" :textInputOptions="textInputOptions"
-                            textInput v-show="chosenType == 'Task'" />
+                            textInput v-if="this.chosenType == 'Task'" />
                     </div>
                 </div>
                 <div class="float-child-2">
@@ -344,6 +345,7 @@ import TheNavigation from './TheNavigation.vue';
 import DropDown from './ourBeautifulDropdown.vue'
 
 
+
 export default {
     name: 'ViewTicket',
     components: {
@@ -356,7 +358,7 @@ export default {
         Datepicker,
         TheNavigation,
         DropDown,
-        svgMain
+        svgMain,
     },
     data() {
         return {
@@ -372,6 +374,7 @@ export default {
             priorityOptions: ['- No Change -', 'Low', 'Normal', 'High', 'Urgent'],
             tagsToAdd: [],
             tagsToRemove: [],
+            chosenType: '- No Change -',
             isOpen: true, // for collapsing the views panel
             ascending: false,
             sortColumn: '',
@@ -654,6 +657,10 @@ export default {
             this.noteActive = true;
             this.showPopper = false;
         },
+        getTicketType(val){
+            this.chosenType= val;
+            console.log(this.chosenType);
+        },
         async getRespectiveRows(type) {
             var instance = axios.create({
                 headers: {
@@ -781,6 +788,7 @@ export default {
     display: flex;
     font-family: 'Roboto', sans-serif;
 }
+
 
 .tab-container {
     width: 20%;
@@ -1435,6 +1443,7 @@ a {
 .gray {
     background-color: gray;
 }
+
 </style>
 <style>
 .v3ti span.v3ti-tag {
