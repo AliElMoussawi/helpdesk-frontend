@@ -17,7 +17,7 @@
                         <div class="filteredAllUsers">
                             <div style="display: flex; flex-direction: row">
                                 <button id="user-button">
-                                    <svgMain name="personFill"/>
+                                    <svgMain name="personFill" />
                                 </button>
                                 <div @click="search = item.userName">
                                     <div class="info">{{ item.userName }}</div>
@@ -30,7 +30,43 @@
                     <a id="addUser" @click="showModal = true">+ Add user</a>
 
                 </div>
-                <span class="text-modal">Assignee</span>
+                <div style="flex; flex-direction: row">
+                    <span class="text-modal">Assignee</span>
+                    <span id="link-style" style="float: right; margin-top: 18px; margin-right: 15px;"
+                        @click="changeAssignee(this.getGroup(this.currentUserID) + '/' + this.getUserName(this.currentUserID))">take
+                        it</span>
+                </div>
+
+                <div class="dropdown-1">
+                    <button class="dropbtn-1" @click="toggleAssigneePanel()">{{
+                            this.chosenAssignee
+                    }} <span class="down-arrow" style="margin-right: 8px"><svgMain name="arrowHeadBottom"/></span></button>
+                    <div class="dropdown-content expanded" v-show="assigneeClicked === true" id="drop-down">
+                        <a id="groupsTitle">Groups</a>
+                        <a @click="groupClicked === false ? groupClicked = true : groupClicked = false">
+                            <svgMain name="groupOfPeople" />
+                            {{ this.getGroup(this.currentUserID) }}
+                            <div style="float: right; margin-right: 8px; margin-top: 3px;">
+                                <svgMain name="expandArrow" />
+                            </div>
+                        </a>
+                    </div>
+                    <div class="dropdown-content expanded" v-show="groupClicked === true" id="sub-drop-down">
+                        <a @click="groupClicked = false"> <div style="display: inline-block; vertical-align: -0.125em;"><svgMain name="collapseArrow"/> </div>Groups</a>
+                        <a @click="changeAssignee(this.getGroup(this.currentUserID))">
+                            <svgMain name="groupOfPeople" />
+                            {{ this.getGroup(this.currentUserID) }}
+                        </a>
+                        <template v-for="user in getCurrentGroupUsers(this.getGroup(this.currentUserID))"
+                            :key="user.id">
+                            <a @click="changeAssignee(this.getGroup(user.id) + '/' + user.userName)">
+                                <div style="margin-right: 5px;"></div>
+                                <svgMain name="personFill" />
+                                {{ user.userName }}
+                            </a>
+                        </template>
+                    </div>
+                </div>
                 <span class="text-modal">Followers
                     <svgMain name="infoIcon" />
                 </span>
@@ -43,7 +79,7 @@
                             <div @click="searchAgents = item.userName">
                                 <div style="display: flex; flex-direction: row">
                                     <button id="user-button">
-                                        <svgMain name="personFill"/>
+                                        <svgMain name="personFill" />
                                     </button>
                                     <div>
                                         <div class="info">{{ item.userName }}</div>
@@ -100,7 +136,7 @@
             <div class="child3">
                 <div style="border-bottom: 1px solid rgb(228, 227, 227);">
                     <button id="person-button">
-                        <svgMain name="personTransparent"/>
+                        <svgMain name="personTransparent" />
                     </button>
                 </div>
             </div>
@@ -231,6 +267,11 @@ export default {
             showMenu: false,
             searchAgents: '',
             showAgents: false,
+            assigneeClicked: false,
+            groupClicked: false,
+            chosenAssignee: "-",
+            groups: [],
+            currentUserID: this.$store.state.id,
         }
     },
     components: {
@@ -301,6 +342,7 @@ export default {
         getData() {
             this.getAgents();
             this.getAllUsers();
+            this.getGroups();
         },
         radioChange(val) {
             this.selectedUserType = val;
@@ -308,7 +350,48 @@ export default {
         changeStaffType(val) {
             this.chosenStaffType = val;
             this.showMenu == true ? this.showMenu = false : this.showMenu = true;
-        }
+        },
+        changeAssignee(newAssignee) {
+            this.assigneeClicked === false ? this.assigneeClicked = true : this.assigneeClicked = false;
+            this.chosenAssignee = newAssignee;
+            this.assigneeClicked = false;
+            this.groupClicked = false;
+        },
+        getGroup(id) {
+            var name = '';
+            for (let i = 0; i < this.groups.length; i++) {
+                for (let j = 0; j < this.groups[i].user.length; j++) {
+                    if (this.groups[i].user[j].id == id) {
+                        name = this.groups[i].name;
+                        return name;
+                    }
+                }
+            }
+            return name;
+        },
+        async getGroups() {
+            var instance = axios.create({
+                headers: {
+                    'sessionId': this.$store.state.session,
+                    'token': this.$store.state.token
+                }
+            })
+            instance.get(this.url + 'group').then((response) => {
+                this.groups = response.data;
+            }).catch((error) => {
+                console.log(error.response);
+            })
+        },
+        getUserName(id) {
+            return this.allUsers.find(u => u.id === id).userName;
+        },
+        toggleAssigneePanel() {
+            this.assigneeClicked === false ? this.assigneeClicked = true : this.assigneeClicked = false;
+            this.groupClicked = false;
+        },
+        getCurrentGroupUsers(groupName) {
+            return this.groups.find(g => g.name === groupName).user;
+        },
     },
     created() {
         this.getData();
@@ -651,6 +734,7 @@ header[data-v-128f56e5] {
     max-width: calc(25% - 45px);
     left: 0;
     right: 0;
+    margin-left: 15px;
 }
 
 #addUser {
@@ -660,6 +744,21 @@ header[data-v-128f56e5] {
     margin-left: 15px;
     border: 1px solid rgb(230, 230, 230);
     z-index: 5;
+}
+
+.dropdown-content {
+    max-width: calc(25% - 35px);
+}
+
+.expanded a {
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    height: 30px;
+    padding-top: 5px;
 }
 
 .filteredAllAgents,
@@ -791,7 +890,9 @@ header[data-v-128f56e5] {
 }
 
 
-
+#groupsTitle:hover {
+    background-color: white !important;
+}
 #staff-type {
     border: 1px solid rgb(230, 230, 230);
     height: 24px;
@@ -808,6 +909,64 @@ header[data-v-128f56e5] {
     top: 210px;
     width: calc(100% - 60px);
     border-radius: 5px;
+}
+
+#link-style {
+    color: #0000EE;
+    font-weight: normal;
+    margin-bottom: 0px;
+}
+
+#link-style:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.down-arrow {
+    float: right;
+}
+
+.dropdown-1 {
+    display: inline-block;
+    width: 100%;
+}
+
+.dropbtn-1 {
+    background-color: #ffffff;
+    color: rgb(0, 0, 0);
+    font-size: 12px;
+    border: 1px solid rgb(228, 227, 227);
+    cursor: pointer;
+    height: 30px;
+    margin: auto;
+    text-align: left;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    margin-left: 15px;
+    width: calc(100% - 30px);
+    border-radius: 5px;
+}
+
+.dropbtn-1:hover {
+    border-color: rgb(0, 60, 138);
+    background-color: white;
+}
+
+#drop-down a,
+#sub-drop-down a {
+    border: none;
+}
+
+#drop-down,
+#sub-drop-down {
+    border: 1px solid rgb(228, 227, 227);
+    width: 100%;
+    margin-left: 15px;
+}
+
+#drop-down a:hover,
+#sub-drop-down a:hover {
+    background-color: aliceblue;
 }
 </style>
 

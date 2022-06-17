@@ -577,20 +577,17 @@ export default {
             }
         },
         getData() {
-            console.log()
-            setTimeout(function () { this.load = true; }.bind(this), 10);
+            this.load = true;
+            for (var respectiveColumn of this.respectiveColumns) {
+                this.getRespectiveRows(respectiveColumn.tabType)
+            }
 
-            setTimeout(function () {
-                for (var respectiveColumn of this.respectiveColumns) {
-                    this.getRespectiveRows(respectiveColumn.tabType)
-                }
-            }.bind(this), 500);
 
-            setTimeout(function () { this.tickets = ticketsData; }.bind(this), 500);
-            setTimeout(function () { this.getUsers() }.bind(this), 500);
-            setTimeout(function () { this.getGroups() }.bind(this), 500);
+            this.tickets = ticketsData;
+            this.getUsers();
+            this.getGroups();
 
-            setTimeout(function () { this.load = false; }.bind(this), 500);
+            this.load = false;
         },
         getCurrentGroupUsers(groupName) {
             return this.groups.find(g => g.name === groupName).user;
