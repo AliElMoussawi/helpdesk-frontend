@@ -363,7 +363,7 @@ export default {
     data() {
         return {
             showPopper: false,
-            url: 'http://192.168.3.25:8080/',
+            url: 'http://10.169.31.140:8080/',
             showModalSpam: false,
             showModal: false, //for the deleteTicket
             showModalDeleteForever: false,

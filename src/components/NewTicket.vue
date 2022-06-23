@@ -257,7 +257,7 @@ export default {
     name: 'NewTicket',
     data() {
         return {
-            url: 'http://192.168.3.25:8080/',
+           url: 'http://localhost:8080/',
             tagsToAdd: [],
             buttonText: 'Public reply',
             noteActive: false,
@@ -265,18 +265,26 @@ export default {
             search: '',
             allUsers: [],
             agents: [],
+          
             showAddUser: true,
             newUserName: '',
             newUserEmail: '',
             selectedUserType: 'end-user',
             chosenStaffType: 'Light agent',
             showMenu: false,
+            subject_input: null,
             searchAgents: '',
             showAgents: false,
             assigneeClicked: false,
             groupClicked: false,
+            priorityId:1,
+            textarea_typing:null,
             chosenAssignee: "-",
+            chosenAssigneeId:null,
+            chosenRequesterId:this.$store.state.id,
             groups: [],
+            chosenAssigneedGroupId:null,
+            statusId:1,
             currentUserID: this.$store.state.id,
             newUserRole: 1,
             roles: [
@@ -378,12 +386,13 @@ export default {
             }
 
         },
-        changeStaffType(val) {
+        changeStaffType(val) {        
             this.chosenStaffType = val;
             this.newUserRole = this.roles.find(r => r.name == this.chosenStaffType).id;
             this.showMenu == true ? this.showMenu = false : this.showMenu = true;
         },
-        changeAssignee(newAssignee) {
+        changeAssignee(newAssignee) {  
+         
             this.assigneeClicked === false ? this.assigneeClicked = true : this.assigneeClicked = false;
             this.chosenAssignee = newAssignee;
             this.assigneeClicked = false;
@@ -400,6 +409,17 @@ export default {
                 }
             }
             return name;
+        },  getGroupId(id) {
+            var groupId= null;
+            for (let i = 0; i < this.groups.length; i++) {
+                for (let j = 0; j < this.groups[i].user.length; j++) {
+                    if (this.groups[i].user[j].id == id) {
+                        id = this.groups[i].id;
+                        return groupId;
+                    }
+                }
+            }
+            return groupId;
         },
         async getGroups() {
             var instance = axios.create({
@@ -410,12 +430,13 @@ export default {
             })
             instance.get(this.url + 'group').then((response) => {
                 this.groups = response.data;
+                console.log(response.data);
             }).catch((error) => {
                 console.log(error.response);
             })
         },
         getUserName(id) {
-            return this.allUsers.find(u => u.id === id).userName;
+            return this.allUsers.find(u => u.id === id).username;
         },
         toggleAssigneePanel() {
             this.assigneeClicked === false ? this.assigneeClicked = true : this.assigneeClicked = false;
@@ -445,7 +466,46 @@ export default {
                 }).catch((error) => {
                     console.log(error.response)
                 })
-        }
+        },  addNewTickets() {
+            axios
+                .post(this.url + 'ticket/addTicket', {
+                   subject:this.subject_input,
+                   tags:this.tagsToAdd,
+                statusId:this.statusId,
+               requesterId:this.chosenRequesterId,
+                assignedUserId:this.chosenAssigneeId,
+                priorityId:this.priorityId,
+                message:this.textarea_typing,
+                assignedGroupId:this.chosenAssigneedGroupId
+                }, {
+                    headers: {
+                        'sessionId': this.$store.state.session,
+                        'token': this.$store.state.token
+                    }
+                })
+                .then(() => {
+                    this.newUserName = '';
+                    this.newUserEmail = '';
+                    this.newUserRole = 1;
+                    this.showModal = false;
+                    this.getData();
+                }).catch((error) => {
+                    console.log(error.response)
+                })
+        }, 
+      checkForm() {
+
+      if (this.subject_input && this.textarea_typing) {
+         this.addNewTickets();
+         console.log('done');
+      }
+      if (!this.subject_input) {
+       console.log('subject required');
+      }
+      if (!this.textarea_typing) {
+        console.log('message required.');
+      }
+    }
     },
     created() {
         this.getData();
@@ -464,6 +524,7 @@ export default {
     },
 }
 </script>
+
 
 <style scoped>
 header[data-v-128f56e5] {

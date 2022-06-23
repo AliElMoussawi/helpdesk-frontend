@@ -34,7 +34,7 @@ export default {
         return {
             username: '',
             password: '',
-            url: 'http://192.168.3.25:8080/',
+            url: 'http://10.169.31.140:8080/',
         }
     },
     methods: {
@@ -47,7 +47,6 @@ export default {
                 .then((response) => {
                     this.$store.commit('login', response.data)
                     router.push({name: 'Tickets'})
-                    // console.log(this.$store.state)
                 }).catch((error) => {
                     console.log(error.response)
                 })
