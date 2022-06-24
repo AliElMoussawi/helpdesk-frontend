@@ -33,7 +33,7 @@
                 <div style="flex; flex-direction: row">
                     <span class="text-modal">Assignee</span>
                     <span id="link-style" style="float: right; margin-top: 18px; margin-right: 15px;"
-                        @click="changeAssignee(this.getGroup(this.currentUserID) + '/' + this.getUserName(this.currentUserID))">take
+                        @click="changeAssignee(this.getGroup(this.currentUserID).name + '/' + this.getUserName(this.currentUserID))">take
                         it</span>
                 </div>
 
@@ -47,7 +47,7 @@
                         <a id="groupsTitle">Groups</a>
                         <a @click="groupClicked === false ? groupClicked = true : groupClicked = false">
                             <svgMain name="groupOfPeople" />
-                            {{ this.getGroup(this.currentUserID) }}
+                            {{ this.getGroup(this.currentUserID).name }}
                             <div style="float: right; margin-right: 8px; margin-top: 3px;">
                                 <svgMain name="expandArrow" />
                             </div>
@@ -61,11 +61,11 @@
                         </a>
                         <a @click="changeAssignee(this.getGroup(this.currentUserID))">
                             <svgMain name="groupOfPeople" />
-                            {{ this.getGroup(this.currentUserID) }}
+                            {{ this.getGroup(this.currentUserID).name }}
                         </a>
-                        <template v-for="user in getCurrentGroupUsers(this.getGroup(this.currentUserID))"
+                        <template v-for="user in getCurrentGroupUsers(this.getGroup(this.currentUserID).id)"
                             :key="user.id">
-                            <a @click="changeAssignee(this.getGroup(user.id) + '/' + user.userName)">
+                            <a @click="changeAssignee(this.getGroup(user.id).name + '/' + user.userName)">
                                 <div style="margin-right: 5px;"></div>
                                 <svgMain name="personFill" />
                                 {{ user.userName }}
@@ -106,7 +106,7 @@
             </div>
             <div class="child2">
                 <div id="subchild1">
-                    <input placeholder="Subject" id="subject-input" />
+                    <input placeholder="Subject" id="subject_ input" v-model="subject_input" />
                 </div>
                 <div id="subchild2"></div>
                 <div id="subchild3" style="flex-grow: 2; display: flex; flex-direction: column;"
@@ -135,7 +135,7 @@
                         </Popper>
                     </div>
                     <div style="flex-grow: 2; margin-right: 4px; margin-bottom: 4px;">
-                        <textarea id="textarea-typing" :class="{ note: noteActive }"></textarea>
+                        <textarea id="textarea-typing" v-model="textarea_typing" :class="{ note: noteActive }"></textarea>
                     </div>
                 </div>
             </div>
@@ -147,9 +147,9 @@
                 </div>
             </div>
         </div>
-        <div id="footer">
+        <div id="footer">:disabled="!(checkfields())
             <div id="buttons-right">
-                <button class="button-39" id="submit-button">Submit</button>
+                <button class="button-39" id="submit-button" @click="checkForm()" >Submit</button>
                 <Popper>
                     <button class="button-39" id="menu-submit">˅</button>
                     <template #content>
@@ -341,10 +341,12 @@ export default {
         setPublicReply() {
             this.buttonText = 'Public reply';
             this.noteActive = false;
+           
         },
         setInternalNote() {
             this.buttonText = 'Internal note';
             this.noteActive = true;
+         
         },
         async getAllUsers() {
             var instance = axios.create({
@@ -399,16 +401,19 @@ export default {
             this.groupClicked = false;
         },
         getGroup(id) {
-            var name = '';
+            var obj = { "name": null,
+
+        "id": null}
             for (let i = 0; i < this.groups.length; i++) {
                 for (let j = 0; j < this.groups[i].user.length; j++) {
                     if (this.groups[i].user[j].id == id) {
-                        name = this.groups[i].name;
-                        return name;
-                    }
+                        obj.name= this.groups[i].name;
+                        obj.id= this.groups[i].id;
+                        this.chosenAssigneedGroupId=obj.id;
+                          return obj; }
                 }
             }
-            return name;
+            return obj;
         },  getGroupId(id) {
             var groupId= null;
             for (let i = 0; i < this.groups.length; i++) {
@@ -436,14 +441,15 @@ export default {
             })
         },
         getUserName(id) {
-            return this.allUsers.find(u => u.id === id).username;
+            return this.allUsers.find(u => u.id === id).userName;
         },
         toggleAssigneePanel() {
             this.assigneeClicked === false ? this.assigneeClicked = true : this.assigneeClicked = false;
             this.groupClicked = false;
         },
-        getCurrentGroupUsers(groupName) {
-            return this.groups.find(g => g.name === groupName).user;
+        getCurrentGroupUsers(id) {
+           console.log(this.groups);
+           return this.groups.find(g => g.id === id).user;
         },
         addNewUser() {
             axios
@@ -476,7 +482,8 @@ export default {
                 assignedUserId:this.chosenAssigneeId,
                 priorityId:this.priorityId,
                 message:this.textarea_typing,
-                assignedGroupId:this.chosenAssigneedGroupId
+                assignedGroupId:this.chosenAssigneedGroupId,
+                internal:this.noteActive
                 }, {
                     headers: {
                         'sessionId': this.$store.state.session,
@@ -492,12 +499,19 @@ export default {
                 }).catch((error) => {
                     console.log(error.response)
                 })
-        }, 
+        }, checkfields(){
+
+      if (this.subject_input && this.textarea_typing &&this.chosenRequesterId  && this.chosenAssigneeId) {
+    return true;
+    }
+    return false;},
       checkForm() {
 
       if (this.subject_input && this.textarea_typing) {
          this.addNewTickets();
+        console.log('internal :'+  this.noteActive);
          console.log('done');
+         console.log("group id : "+this.chosenAssigneedGroupId)
       }
       if (!this.subject_input) {
        console.log('subject required');
@@ -782,7 +796,7 @@ header[data-v-128f56e5] {
     padding: 20px;
 }
 
-#subject-input {
+#subject_input {
     width: 100%;
     border: 1px solid rgb(230, 230, 230);
     border-radius: 5px;

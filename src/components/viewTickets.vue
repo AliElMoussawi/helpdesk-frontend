@@ -107,8 +107,8 @@
                                 <template #content>
                                     <div id="popcontent">
                                         <div id="content-header">
-                                            <div class="open-badge">{{ticket.status.status}}</div>
-                                            <div>{{ ticket.ticketType.name }} ({{ ticket.priority.name }})</div>
+                                            <div class="open-badge">{{ticket.statusId}}</div>
+                                            <div>{{ ticket.ticketType}} ({{ ticket.priority }})</div>
                                         </div>
                                         <br />
                                         <div><strong>{{ ticket.subject }}</strong></div>
@@ -363,7 +363,7 @@ export default {
     data() {
         return {
             showPopper: false,
-            url: 'http://10.169.31.140:8080/',
+            url: 'http://localhost:8080/',
             showModalSpam: false,
             showModal: false, //for the deleteTicket
             showModalDeleteForever: false,
@@ -596,6 +596,7 @@ export default {
             return this.groups.find(g => g.name === groupName).user;
         },
         getGroup(id) {
+            console.log("id:"+id);
             var name = '';
             for (let i = 0; i < this.groups.length; i++) {
                 for (let j = 0; j < this.groups[i].user.length; j++) {

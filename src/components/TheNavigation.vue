@@ -36,7 +36,7 @@ import svgMain from  './svgMain.vue'
 export default {
     data() {
         return {
-            url: 'http://192.168.3.25:8080/',
+            url: 'http://localhost:8080/',
         }
     },
     components: {
