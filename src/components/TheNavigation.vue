@@ -22,26 +22,84 @@
                 </Popper>
             </div>
         </nav>
-        <div >
-            <router-link id="add-button" to="/newTicket"> + Add </router-link>
-        </div>
+    <div class="dropdown">
+        <router-link id="add-button" to="/newTicket"> + Add </router-link>
+    <div class="dropdown-content">
+        <router-link id="a" to="/newTicket"> + Add ticket </router-link>
+        <router-link id="a" to="/Modal">search </router-link>
+        <a  id="a addgroup" @click="showModalAddGroup = true">Add group</a>
+        <router-link id="a" to="/Modal">search </router-link>
+    </div>
+       
+    </div>
     </header>
+   <VueModal v-model="showModalAddGroup" title="Add new user" style="display: flex; flex-direction: column;">
+
+            <div class="text-modal">Name</div>
+            <div><input type="text" class="add-user-input"></div>
+            <div class="text-modal">Email</div>
+            <div><input type="email" class="add-user-input"></div>
+            <div class="text-modal">User type</div>
+            <div style="margin-left:15px; margin-top: 5px;">
+
+
+            </div>
+
+            <div v-show="this.selectedUserType == 'staff-member'">
+                
+                <div id="staff-type" @click="showMenu == true ? showMenu = false : showMenu = true">{{ chosenStaffType
+                }}
+                </div>
+
+            </div>
+
+
+            <br />
+            <div>
+                <button class="button-39" id="addButton" >Add</button>
+                <button class="button-39" id="cancelButton" @click="showModalAddGroup = false">Cancel</button>
+            </div>
+            <br />
+            <br />
+            <br />
+        </VueModal>
 </template>
 
 <script>
 import Popper from "vue3-popper";
 import axios from 'axios'
 import router from '../router'
+import VueModal from '@kouts/vue-modal';
 import svgMain from  './svgMain.vue'
 export default {
     data() {
         return {
             url: 'http://localhost:8080/',
+            showModalAddGroup: false,
+             roles: [
+                {
+                    name: 'New',
+                    id: 1
+                },
+                {
+                    name: 'Agent',
+                    id: 2
+                },
+                {
+                    name: 'Administrator',
+                    id: 3
+                },
+                {
+                    name: 'Light Agent',
+                    id: 4
+                }
+            ]
         }
     },
     components: {
         Popper,
         svgMain,
+         VueModal,
     },
     methods: {
         async signout() {
@@ -125,5 +183,71 @@ header nav {
 #add-button:hover {
     cursor: pointer;
 }
+.dropbtn {
+  background-color: #04AA6D;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+}
 
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 135px;
+  box-shadow: 10px 8px 16px 10px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content #a {
+  color: black;
+  padding: 8px 8px;
+  text-decoration: none;
+  display: block;
+}
+.text-modal {
+    margin-bottom: 5px;
+    display: inline-block;
+    font-weight: bold;
+    padding-left: 15px;
+    margin-top: 18px;
+}
+#title {
+    padding-top: 3px;
+    background-color: rgb(233, 233, 233);
+    border: 1px solid rgb(230, 230, 230);
+    border-radius: 5px;
+    width: 80px;
+    padding-bottom: 8px;
+    padding-left: 10px;
+    padding-right: 6px;
+}
+.dropdown-content #a:hover {background-color: #ddd;}
+
+.dropdown:hover .dropdown-content {display: block;}
+
+.dropdown:hover .dropbtn {background-color: #3e8e41;}
+.add-user-input {
+    width: 95%;
+    margin-left: 15px;
+    margin-right: 15px;
+    height: 25px;
+    border: 1px solid rgb(230, 230, 230);
+    border-radius: 5px;
+}
+
+#addGroup {
+    background-color: #f3f3f3;
+    padding-left: 10px;
+    margin-right: 15px;
+    margin-left: 15px;
+    border: 1px solid rgb(230, 230, 230);
+    z-index: 5;
+}
 </style>

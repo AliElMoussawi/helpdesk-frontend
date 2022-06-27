@@ -312,7 +312,7 @@
         <br />
     </VueModal>
 
-    <VueModal v-model="showModalSpam" title="Mark tickets as spam">
+<VueModal v-model="showModalSpam" title="Mark tickets as spam">
         <p>This will delete the tickets and block the requesters.</p>
         <br />
         <div>

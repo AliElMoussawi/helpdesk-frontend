@@ -3,7 +3,12 @@
         <TheNavigation style="z-index=100" />
         <div>
             <div id="heading-stripe">
-                <div id="title"><span id="new">NEW</span> <span id="title-name">Ticket</span></div>
+                <div v-if="this.statusId=1" id="title"><span id="declaration" style="background-color:orange;">New</span> <span id="title-name">Ticket</span></div>
+                <div v-else-if="this.statusId=2" id="title"><span id="declaration" style="background-color:red;">Open</span> <span id="title-name">Ticket</span></div>
+                <div v-else-if="this.statusId=3" id="title"><span id="declaration" style="background-color:purple;">Pending</span> <span id="title-name">Ticket</span></div>
+                <div v-else-if="this.statusId=4" id="title"><span id="declaration" style="background-color:gray;">Closed</span> <span id="title-name">Ticket</span></div>
+            
+            
             </div>
         </div>
         <div class="float-container">
@@ -155,16 +160,16 @@
                     <template #content>
                         <div id="popcontent-menu">
                             <div class="menu-component">
-                                <div class='box orange'></div>Submit as <strong>New</strong>
+                                <div class='box orange' @click="this.getTicketObj(1)"></div>Submit as <strong>New</strong>
                             </div>
                             <div class="menu-component">
-                                <div class='box red'></div>Submit as <strong>Open</strong>
+                                <div class='box red' @click="this.getTicketObj(2)"></div>Submit as <strong>Open</strong>
                             </div>
                             <div class="menu-component">
-                                <div class='box blue'></div>Submit as <strong>Pending</strong>
+                                <div class='box blue' @click="this.getTicketObj(3)"></div>Submit as <strong>Pending</strong>
                             </div>
                             <div class="menu-component">
-                                <div class='box gray'></div>Submit as <strong>Solved</strong>
+                                <div class='box gray'  @click="this.getTicketObj(4)"></div>Submit as <strong>Solved</strong>
                             </div>
                         </div>
                     </template>
@@ -303,6 +308,29 @@ export default {
                 {
                     name: 'Light Agent',
                     id: 4
+                }
+            ],
+            color:'orange',
+             ticketTypes: [
+                {
+                    type: 'New',
+                    id: 1,
+                    color:'orange'
+                },
+                {
+                    name: 'Open',
+                    id: 2,
+                    color:'red'
+                },
+                {
+                    name: 'Pending',
+                    id: 3,
+                    color:'blue'
+                },
+                {
+                    name: 'Solved',
+                    id: 4,
+                    color:'grey'
                 }
             ]
         }
@@ -472,6 +500,12 @@ export default {
                 }).catch((error) => {
                     console.log(error.response)
                 })
+        },
+        getTicketObj(id) {
+            this.color=this.ticketTypes.find(u => u.id === id).color;
+            this.statusId=this.ticketTypes.find(u => u.id === id).id;
+            console.group("color : " +this.color + " status : "+this.statusId);
+            return this.ticketTypes.find(u => u.id === id);
         },  addNewTickets() {
             axios
                 .post(this.url + 'ticket/addTicket', {
@@ -585,9 +619,9 @@ header[data-v-128f56e5] {
     padding-right: 6px;
 }
 
-#new {
+#declaration {
     height: 10px;
-    background-color: rgb(255, 186, 59);
+ 
     border-radius: 5px;
     border-color: transparent;
     font-size: 11px;
