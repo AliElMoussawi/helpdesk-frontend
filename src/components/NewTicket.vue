@@ -1,20 +1,15 @@
 <template>
+    <TheNavigation style="z-index=100" />
     <div id="container">
-        <TheNavigation style="z-index=100" />
-        <div>
-            <div id="heading-stripe">
-                <div v-if="this.statusId=1" id="title"><span id="declaration" style="background-color:orange;">New</span> <span id="title-name">Ticket</span></div>
-                <div v-else-if="this.statusId=2" id="title"><span id="declaration" style="background-color:red;">Open</span> <span id="title-name">Ticket</span></div>
-                <div v-else-if="this.statusId=3" id="title"><span id="declaration" style="background-color:purple;">Pending</span> <span id="title-name">Ticket</span></div>
-                <div v-else-if="this.statusId=4" id="title"><span id="declaration" style="background-color:gray;">Closed</span> <span id="title-name">Ticket</span></div>
-            
-            
-            </div>
-        </div>
-        <div class="float-container">
+            <div>
+                <div id="heading-stripe">
+                <div  id="title"><span id="declaration" style="background-color:orange;color:white;font-weight: 600;">{{this.ticketTypes[this.chosenStatus].name}}</span> <span id="title-name">Ticket</span></div>
+                   </div>
+                </div>
+            <div class="float-container">
             <div class="child1">
-                <span class="text-modal">Requester</span>
-                <input type="text" class="icon" placeholder="search name or contact info" v-model="search" autofocus
+                    <span class="text-modal">Requester</span>
+                        <input type="text" class="icon" placeholder="search name or contact info" v-model="search" autofocus
                     v-on:focusout="delay()" v-on:focus="showAddUser = true">
                 <div class="dropdown-content-1" v-if="showAddUser">
                     <div v-for="(item, index) in filteredUsers" :key="index" v-show="search.length != 0"
@@ -64,7 +59,7 @@
                                 <svgMain name="collapseArrow" />
                             </div>Groups
                         </a>
-                        <a @click="changeAssignee(this.getGroup(this.currentUserID))">
+                        <a @click="changeAssignee(this.getGroup(this.currentUserID).name)">
                             <svgMain name="groupOfPeople" />
                             {{ this.getGroup(this.currentUserID).name }}
                         </a>
@@ -107,11 +102,53 @@
                         <vue3-tags-input :tags="tagsToAdd" placeholder="input tags"
                             @on-tags-changed="handleChangeTagAdd" id="tags" />
                     </div>
-                </div>
-            </div>
+                 <div class="t00" style="flex; flex-direction: row">
+                    <div style="width: 50%;">
+                        <span class="text-modal" >Type</span>
+                         <div class="dropdown-1" >
+                            <button class="dropbtn-1 t" :disabled="priorityClicked==true" @click="toggleTypePanel()">{{
+                            types[this.chosenType-1].name}} 
+                            <span class="down-arrow" style="margin-right: 8px">
+                            <svgMain name="arrowHeadBottom" /></span>
+                            </button>
+                            <div class="dropdown-content expanded" v-show="typeClicked === true" id="drop-down">
+                        <template v-for="t in this.types"
+                            :key="t.id">
+                            <a @click="changeType(t.id)">
+                                <div style="margin-right: 5px;"></div>
+                                <svgMain name="personFill" />
+                                {{ t.name }}
+                            </a>
+                            </template>
+                    </div>
+                </div> </div>
+                    <div style="width: 50%;">
+                        <span class="text-modal">Priority</span>
+                        <div class="dropdown-1">
+                            <button class="dropbtn-1 t" @click="togglePriorityPanel()">{{
+                            priorities[this.chosenPriority-1].name}} 
+                            <span class="down-arrow" style="margin-right: 8px">
+                            <svgMain name="arrowHeadBottom" /></span>
+                            </button>
+                            <div class="dropdown-content expanded" v-show="priorityClicked === true" id="drop-down">
+                                <template v-for="p in this.priorities"
+                                  :key="p.id">
+                                     <a @click="changePriority(p.id)">
+                                    <div style="margin-right: 5px;"></div>
+                                    <svgMain name="personFill" />
+                                        {{ p.name }}
+                                      </a>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+           
+        </div> 
+        </div>
+ </div>
             <div class="child2">
                 <div id="subchild1">
-                    <input placeholder="Subject" id="subject_ input" v-model="subject_input" />
+                    <input placeholder="Subject" id="subject_input" v-model="subject_input" />
                 </div>
                 <div id="subchild2"></div>
                 <div id="subchild3" style="flex-grow: 2; display: flex; flex-direction: column;"
@@ -152,24 +189,24 @@
                 </div>
             </div>
         </div>
-        <div id="footer">:disabled="!(checkfields())
+        <div id="footer">
             <div id="buttons-right">
                 <button class="button-39" id="submit-button" @click="checkForm()" >Submit</button>
-                <Popper>
-                    <button class="button-39" id="menu-submit">˅</button>
+                <Popper  :show="statusClicked">
+                    <button class="button-39" id="menu-submit" @click="toggleStatusPanel()">˅</button>
                     <template #content>
-                        <div id="popcontent-menu">
-                            <div class="menu-component">
-                                <div class='box orange' @click="this.getTicketObj(1)"></div>Submit as <strong>New</strong>
+                        <div id="popcontent-menu" >
+                            <div class="menu-component" @click="this.getTicketObj(1)">
+                                <div class='box orange' ></div>Submit as <strong>New</strong>
                             </div>
-                            <div class="menu-component">
-                                <div class='box red' @click="this.getTicketObj(2)"></div>Submit as <strong>Open</strong>
+                            <div class="menu-component" @click="this.getTicketObj(2)">
+                                <div class='box red' ></div>Submit as <strong>Open</strong>
                             </div>
-                            <div class="menu-component">
-                                <div class='box blue' @click="this.getTicketObj(3)"></div>Submit as <strong>Pending</strong>
+                            <div class="menu-component" @click="this.getTicketObj(3)">
+                                <div class='box blue' ></div>Submit as <strong>Pending</strong>
                             </div>
-                            <div class="menu-component">
-                                <div class='box gray'  @click="this.getTicketObj(4)"></div>Submit as <strong>Solved</strong>
+                            <div class="menu-component" @click="this.getTicketObj(4)">
+                                <div class='box gray'  ></div>Submit as <strong>Solved</strong>
                             </div>
                         </div>
                     </template>
@@ -271,7 +308,7 @@ export default {
             allUsers: [],
             agents: [],
           
-            showAddUser: true,
+            showAddUser: false,
             newUserName: '',
             newUserEmail: '',
             selectedUserType: 'end-user',
@@ -281,18 +318,59 @@ export default {
             searchAgents: '',
             showAgents: false,
             assigneeClicked: false,
+            typeClicked:false,
+            priorityClicked:false,
             groupClicked: false,
             priorityId:1,
+            statusClicked:false,
             textarea_typing:null,
             chosenAssignee: "-",
+            chosenType:1,
+            chosenPriority:2,
             chosenAssigneeId:null,
             chosenRequesterId:this.$store.state.id,
             groups: [],
             chosenAssigneedGroupId:null,
-            statusId:1,
+            chosenStatus:1,
             currentUserID: this.$store.state.id,
             newUserRole: 1,
-            roles: [
+            types: [
+                {
+                    name: 'Question',
+                    id: 1
+                },
+                {
+                    name: 'test',
+                    id: 2
+                },
+                {
+                    name: 'problem',
+                    id: 3
+                },
+                {
+                    name: 'Task',
+                    id: 4
+                }
+            ]
+            ,priorities: [
+                {
+                    name: 'low',
+                    id: 1
+                },
+                {
+                    name: 'normal',
+                    id: 2
+                },
+                {
+                    name: 'high',
+                    id: 3
+                },
+                {
+                    name: 'urgent',
+                    id: 4
+                }
+            ]
+            ,roles: [
                 {
                     name: 'End User',
                     id: 1
@@ -311,9 +389,9 @@ export default {
                 }
             ],
             color:'orange',
-             ticketTypes: [
+             ticketTypes: [{},
                 {
-                    type: 'New',
+                    name: 'New',
                     id: 1,
                     color:'orange'
                 },
@@ -427,6 +505,18 @@ export default {
             this.chosenAssignee = newAssignee;
             this.assigneeClicked = false;
             this.groupClicked = false;
+        },changeType(newType) {  
+         console.log(newType+"   "+this.chosenType+" ");
+            this.typeClicked === false ? this.typeClicked = true : this.typeClicked = false;
+            this.chosenType= newType;
+            this.typeClicked = false;
+         console.log(newType+"   "+this.chosenType+" ");
+
+        },changePriority(newPriority) {  
+         
+            this.priorityClicked === false ? this.priorityClicked = true : this.priorityClicked = false;
+            this.chosenPriority= newPriority;
+            this.priorityClicked = false;
         },
         getGroup(id) {
             var obj = { "name": null,
@@ -474,6 +564,15 @@ export default {
         toggleAssigneePanel() {
             this.assigneeClicked === false ? this.assigneeClicked = true : this.assigneeClicked = false;
             this.groupClicked = false;
+        },toggleTypePanel() {
+            this.typeClicked === false ? this.typeClicked = true : this.typeClicked = false;
+            
+        },toggleStatusPanel() {
+            this.statusClicked === false ? this.statusClicked = true : this.statusClicked = false;
+            
+        },togglePriorityPanel() {
+            this.priorityClicked === false ? this.priorityClicked = true : this.priorityClicked = false;
+            
         },
         getCurrentGroupUsers(id) {
            console.log(this.groups);
@@ -503,15 +602,20 @@ export default {
         },
         getTicketObj(id) {
             this.color=this.ticketTypes.find(u => u.id === id).color;
-            this.statusId=this.ticketTypes.find(u => u.id === id).id;
-            console.group("color : " +this.color + " status : "+this.statusId);
-            return this.ticketTypes.find(u => u.id === id);
+            this.chosenStatus=this.ticketTypes.find(u => u.id === id).id;
+            console.log("color : " +this.color + " status : "+this.chosenStatus);
+            this.statusClicked = false;
+            document.getElementById("declaration").style.backgroundColor = this.color;
+            this.statusId=this.ticketTypes.find(u => u.id === id);
+            console.log("statusId : " +this.statusId );
+            this.checkForm();
+            return this.statusId;
         },  addNewTickets() {
             axios
                 .post(this.url + 'ticket/addTicket', {
                    subject:this.subject_input,
                    tags:this.tagsToAdd,
-                statusId:this.statusId,
+                statusId:this.chosenStatus,
                requesterId:this.chosenRequesterId,
                 assignedUserId:this.chosenAssigneeId,
                 priorityId:this.priorityId,
@@ -529,7 +633,10 @@ export default {
                     this.newUserEmail = '';
                     this.newUserRole = 1;
                     this.showModal = false;
+                    this.chosenPriority=2;
+                    this.chosenType=1;
                     this.getData();
+
                 }).catch((error) => {
                     console.log(error.response)
                 })
@@ -540,12 +647,13 @@ export default {
     }
     return false;},
       checkForm() {
-
+       
       if (this.subject_input && this.textarea_typing) {
          this.addNewTickets();
         console.log('internal :'+  this.noteActive);
          console.log('done');
          console.log("group id : "+this.chosenAssigneedGroupId)
+          this.$router.push("tickets")
       }
       if (!this.subject_input) {
        console.log('subject required');
@@ -580,7 +688,7 @@ header[data-v-128f56e5] {
 }
 
 #container {
-    height: 100vh;
+    height: calc(100vh - 51px);
     display: flex;
     flex-direction: column;
     font-family: 'Roboto', sans-serif;
@@ -613,10 +721,10 @@ header[data-v-128f56e5] {
     background-color: rgb(233, 233, 233);
     border: 1px solid rgb(230, 230, 230);
     border-radius: 5px;
-    width: 80px;
+    width: 95px;
     padding-bottom: 8px;
-    padding-left: 10px;
-    padding-right: 6px;
+    padding-left: 8px;
+    padding-right: 2px;
 }
 
 #declaration {
@@ -911,8 +1019,11 @@ header[data-v-128f56e5] {
 
 .dropdown-content {
     max-width: calc(25% - 35px);
+    width:50%
 }
-
+.expanded{
+    width:50px;
+}
 .expanded a {
     width: 100%;
     padding-left: 10px;
@@ -923,7 +1034,6 @@ header[data-v-128f56e5] {
     height: 30px;
     padding-top: 5px;
 }
-
 .filteredAllAgents,
 .filteredAllUsers {
     background-color: #FFFFFF;
@@ -1091,8 +1201,10 @@ header[data-v-128f56e5] {
 }
 
 .dropdown-1 {
-    display: inline-block;
+    display: flex;
+    justify-self: center;
     width: 100%;
+    
 }
 
 .dropbtn-1 {
@@ -1120,7 +1232,10 @@ header[data-v-128f56e5] {
 #sub-drop-down a {
     border: none;
 }
+.t {
+    width:130px;
 
+}
 #drop-down,
 #sub-drop-down {
     border: 1px solid rgb(228, 227, 227);
@@ -1172,5 +1287,10 @@ header[data-v-128f56e5] {
     padding-right: 30px;
     overflow: auto;
     border-bottom: 1px solid #e5e5e5;
+}
+.t00{
+    display:flex;
+    justify-content: flex-start;
+    height: 85px;
 }
 </style>

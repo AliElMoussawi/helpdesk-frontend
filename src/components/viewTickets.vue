@@ -18,7 +18,7 @@
 
                 <div v-for="col in respectiveColumns" :key="col.tabName">
                     <button class="tab" v-on:click="changeCurrentTab(col.tabName)">
-                        {{ col.tabName }} <span id="numTickets">{{ col.respectiveRows.length }}</span>
+                        {{ col.tabName }} <span id="numTickets">{{ col.count }}</span>
                     </button>
                 </div>
             </div>
@@ -208,7 +208,7 @@
                             <div class="type">
                                 <span class="text-modal">Type</span>
                                 <br />
-                                <DropDown :options="this.typeOptions" @chosenType="getTicketType"></DropDown>
+                                <DropDown :options="typeOptions" @click="getTicketType(typeOptions)"></DropDown>
                             </div>
                             <div class="type" id="priority-choose">
                                 <span class="text-modal">Priority</span>
@@ -216,11 +216,11 @@
                                 <DropDown :options="this.priorityOptions"></DropDown>
                             </div>
                         </div>
-                        <br v-show="chosenType == 'Task'" />
-                        <span class="text-modal" v-show="this.chosenType == 'Task'">Due Date</span>
+                        <br v-show="chosenType == 4" />
+                        <span class="text-modal" v-show="this.chosenType == 4">Due Date</span>
                         <Datepicker v-model="date" :enableTimePicker="false" weekStart="0" :format="format"
                             :previewFormat="format" placeholder="Select date" :textInputOptions="textInputOptions"
-                            textInput v-if="this.chosenType == 'Task'" />
+                            textInput v-if="this.chosenType == 4" />
                     </div>
                 </div>
                 <div class="float-child-2">
@@ -269,16 +269,19 @@
                 <button class="button-39" id="submit-button">Submit</button>
                 <Popper>
                     <button class="button-39" id="menu-submit">˅</button>
-                    <template #content>
-                        <div id="popcontent-menu3">
-                            <div class="menu-component wide">
-                                <div class='box red'></div>Submit as <strong>Open</strong>
+                 <template #content>
+                        <div id="popcontent-menu" >
+                            <div class="menu-component" @click="this.getTicketObj(1)">
+                                <div class='box orange' ></div>Submit as <strong>New</strong>
                             </div>
-                            <div class="menu-component wide">
-                                <div class='box blue'></div>Submit as <strong>Pending</strong>
+                            <div class="menu-component" @click="this.getTicketObj(2)">
+                                <div class='box red' ></div>Submit as <strong>Open</strong>
                             </div>
-                            <div class="menu-component wide">
-                                <div class='box gray'></div>Submit as <strong>Solved</strong>
+                            <div class="menu-component" @click="this.getTicketObj(3)">
+                                <div class='box blue' ></div>Submit as <strong>Pending</strong>
+                            </div>
+                            <div class="menu-component" @click="this.getTicketObj(4)">
+                                <div class='box gray'  ></div>Submit as <strong>Solved</strong>
                             </div>
                         </div>
                     </template>
@@ -362,6 +365,9 @@ export default {
     },
     data() {
         return {
+            statusClicked: false,
+            chosenType:1,
+            chosenPriority:2,
             showPopper: false,
             url: 'http://localhost:8080/',
             showModalSpam: false,
@@ -374,7 +380,6 @@ export default {
             priorityOptions: ['- No Change -', 'Low', 'Normal', 'High', 'Urgent'],
             tagsToAdd: [],
             tagsToRemove: [],
-            chosenType: '- No Change -',
             isOpen: true, // for collapsing the views panel
             ascending: false,
             sortColumn: '',
@@ -386,7 +391,46 @@ export default {
             currentType: "userUnSolvedTickets",
             currentTypeName: "Your unsolved tickets",
             currentIndex: 0,
-            ticketIdsSelected: [],
+            ticketIdsSelected: [], 
+            types: [{
+                name:'- no cahnge -',
+                id:null
+            },
+                {
+                    name: 'Question',
+                    id: 1
+                },
+                {
+                    name: 'test',
+                    id: 2
+                },
+                {
+                    name: 'problem',
+                    id: 3
+                },
+                {
+                    name: 'Task',
+                    id: 4
+                }
+            ]
+            ,priorities: [
+                {
+                    name: 'low',
+                    id: 1
+                },
+                {
+                    name: 'normal',
+                    id: 2
+                },
+                {
+                    name: 'high',
+                    id: 3
+                },
+                {
+                    name: 'urgent',
+                    id: 4
+                }
+            ],
             buttonText: 'Public reply',
             noteActive: false,
             allSelected: false,
@@ -396,42 +440,54 @@ export default {
                     "tabType": "userUnSolvedTickets",
                     "tabColumns": ['Subject', 'Requester', 'Requested', 'Type', 'Priority'],
                     "respectiveRows": [],
+                    "count":0
 
                 },
                 {
                     "tabName": "Unassigned tickets",
                     "tabType": "unAssignedTickets",
                     "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Group'],
-                    "respectiveRows": []
+                    "respectiveRows": [],
+                    "count":null
+
                 },
                 {
                     "tabName": "All unsolved tickets",
                     "tabType": "unsolvedTickets",
                     "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Updated'],
-                    "respectiveRows": []
-                },
+                    "respectiveRows": [],
+                    "count":null
+
+
+},
                 {
                     "tabName": "Recently updated tickets",
                     "tabType": "updatedTickets",
                     "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Group', 'Assignee'],
-                    "respectiveRows": []
+                    "respectiveRows": [],
+                    "count":null
+
                 },
                 {
                     "tabName": "New tickets in your groups",
                     "tabType": "newTickets",
                     "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Assignee'],
+                    "count":null,
                     "respectiveRows": []
                 },
                 {
                     "tabName": "Pending tickets",
                     "tabType": "pendingTickets",
                     "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Group', 'Assignee'],
+                    "count":null,
+                    
                     "respectiveRows": []
                 },
                 {
                     "tabName": "Recently solved tickets",
                     "tabType": "solvedTickets",
                     "tabColumns": ['Subject', 'Requester', 'Requested', 'Priority', 'Group'],
+                    "count":null,
                     "respectiveRows": []
                 },
                 // {
@@ -444,7 +500,9 @@ export default {
                     "tabName": "Suspended tickets",
                     "tabType": 'suspendedTickets',
                     "tabColumns": ['Received', 'Subject'],
+                    "count":null,
                     "respectiveRows": []
+                    
                 },
                 {
                     "tabName": "Deleted tickets",
@@ -581,6 +639,7 @@ export default {
         },
         getData() {
             this.load = true;
+            this.getRespectiveRowsCount();
             for (var respectiveColumn of this.respectiveColumns) {
                 this.getRespectiveRows(respectiveColumn.tabType)
             }
@@ -660,7 +719,7 @@ export default {
         },
         getTicketType(val){
             this.chosenType= val;
-            console.log(this.chosenType);
+            console.log("chosentype :"+this.chosenType);
         },
         async getRespectiveRows(type) {
             var instance = axios.create({
@@ -671,6 +730,32 @@ export default {
             })
             instance.get(this.url + 'ticket/' + type).then((response) => {
                 this.respectiveColumns.find(c => c.tabType === type).respectiveRows = response.data;
+            }).catch((error) => {
+                console.log(error.response);
+            })
+        }, getTicketObj(id) {
+            this.color=this.ticketTypes.find(u => u.id === id).color;
+            this.chosenStatus=this.ticketTypes.find(u => u.id === id).id;
+            console.log("color : " +this.color + " status : "+this.chosenStatus);
+            this.statusClicked = false;
+            document.getElementById("declaration").style.backgroundColor = this.color;
+            this.statusId=this.ticketTypes.find(u => u.id === id);
+            console.log("statusId : " +this.statusId );
+            this.checkForm();
+            return this.statusId;
+        },
+         async getRespectiveRowsCount() {
+            var instance = axios.create({
+                headers: {
+                    'sessionId': this.$store.state.session,
+                    'token': this.$store.state.token
+                }
+            })
+            instance.get(this.url +'ticket/countTickets').then((response) => {
+                for(var item of response.data){
+                    this.respectiveColumns[item.first].count = item.second;
+                    console.log(this.respectiveColumns[item.first].count+'first item' +item.first+ 'second item ' + item.second);
+                }
             }).catch((error) => {
                 console.log(error.response);
             })
@@ -712,6 +797,7 @@ export default {
                     'ticketsIds': this.ticketIdsSelected
                 }
             }).then(() => {
+                this.getRespectiveRowsCount()
                 for (var respectiveColumn of this.respectiveColumns) {
                     this.getRespectiveRows(respectiveColumn.tabType)
                 }
@@ -747,6 +833,7 @@ export default {
                     'token': this.$store.state.token
                 }
             }).then(() => {
+                this.getRespectiveRowsCount()
                 for (var respectiveColumn of this.respectiveColumns) {
                     this.getRespectiveRows(respectiveColumn.tabType)
                 }

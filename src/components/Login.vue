@@ -34,7 +34,7 @@ export default {
         return {
             username: '',
             password: '',
-            url: 'http://10.169.31.140:8080/',
+            url: 'http://localhost:8080/',
         }
     },
     methods: {
