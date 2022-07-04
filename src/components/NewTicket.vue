@@ -292,14 +292,13 @@ import TheNavigation from './TheNavigation.vue';
 import Vue3TagsInput from 'vue3-tags-input';
 import Popper from "vue3-popper";
 import VueModal from '@kouts/vue-modal';
-import axios from 'axios';
 import svgMain from './svgMain.vue'
+import Http,{ENDPOINT} from '../request.js'
 
 export default {
     name: 'NewTicket',
     data() {
         return {
-           url: 'http://localhost:8080/',
             tagsToAdd: [],
             buttonText: 'Public reply',
             noteActive: false,
@@ -455,26 +454,14 @@ export default {
          
         },
         async getAllUsers() {
-            var instance = axios.create({
-                headers: {
-                    'sessionId': this.$store.state.session,
-                    'token': this.$store.state.token
-                }
-            })
-            instance.get(this.url + 'user/').then((response) => {
+            Http().get(ENDPOINT.USER).then((response) => {
                 this.allUsers = response.data;
             }).catch((error) => {
                 console.log(error.response);
             })
         },
         getAgents() {
-            var instance = axios.create({
-                headers: {
-                    'sessionId': this.$store.state.session,
-                    'token': this.$store.state.token
-                }
-            })
-            instance.get(this.url + 'user/allagents').then((response) => {
+            Http().get(ENDPOINT.USER+ 'allagents').then((response) => {
                 this.agents = response.data;
             }).catch((error) => {
                 console.log(error.response);
@@ -545,13 +532,7 @@ export default {
             return groupId;
         },
         async getGroups() {
-            var instance = axios.create({
-                headers: {
-                    'sessionId': this.$store.state.session,
-                    'token': this.$store.state.token
-                }
-            })
-            instance.get(this.url + 'group').then((response) => {
+            Http().get(ENDPOINT.GROUP).then((response) => {
                 this.groups = response.data;
                 console.log(response.data);
             }).catch((error) => {
@@ -579,17 +560,11 @@ export default {
            return this.groups.find(g => g.id === id).user;
         },
         addNewUser() {
-            axios
-                .post(this.url + 'user/', {
+           Http().post(ENDPOINT.USER, {
                     username: this.newUserName,
                     email: this.newUserEmail,
                     category: this.newUserRole
-                }, {
-                    headers: {
-                        'sessionId': this.$store.state.session,
-                        'token': this.$store.state.token
-                    }
-                })
+           })
                 .then(() => {
                     this.newUserName = '';
                     this.newUserEmail = '';
@@ -611,8 +586,7 @@ export default {
             this.checkForm();
             return this.statusId;
         },  addNewTickets() {
-            axios
-                .post(this.url + 'ticket/addTicket', {
+            Http().post(ENDPOINT.TICKET+ 'addTicket', {
                    subject:this.subject_input,
                    tags:this.tagsToAdd,
                 statusId:this.chosenStatus,
