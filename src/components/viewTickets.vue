@@ -343,10 +343,9 @@ import '@kouts/vue-modal/dist/vue-modal.css';
 import { ref } from 'vue';
 import Datepicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
-import axios from 'axios'
 import TheNavigation from './TheNavigation.vue';
 import DropDown from './ourBeautifulDropdown.vue'
-
+import Http,{ENDPOINT} from '../request.js';
 
 
 export default {
@@ -369,7 +368,6 @@ export default {
             chosenType:1,
             chosenPriority:2,
             showPopper: false,
-            url: 'http://localhost:8080/',
             showModalSpam: false,
             showModal: false, //for the deleteTicket
             showModalDeleteForever: false,
@@ -722,13 +720,7 @@ export default {
             console.log("chosentype :"+this.chosenType);
         },
         async getRespectiveRows(type) {
-            var instance = axios.create({
-                headers: {
-                    'sessionId': this.$store.state.session,
-                    'token': this.$store.state.token
-                }
-            })
-            instance.get(this.url + 'ticket/' + type).then((response) => {
+             Http().get(ENDPOINT.TICKET + type).then((response) => {
                 this.respectiveColumns.find(c => c.tabType === type).respectiveRows = response.data;
             }).catch((error) => {
                 console.log(error.response);
@@ -745,13 +737,7 @@ export default {
             return this.statusId;
         },
          async getRespectiveRowsCount() {
-            var instance = axios.create({
-                headers: {
-                    'sessionId': this.$store.state.session,
-                    'token': this.$store.state.token
-                }
-            })
-            instance.get(this.url +'ticket/countTickets').then((response) => {
+            Http().get(ENDPOINT.TICKET + 'countTickets').then((response) => {
                 for(var item of response.data){
                     this.respectiveColumns[item.first].count = item.second;
                     console.log(this.respectiveColumns[item.first].count+'first item' +item.first+ 'second item ' + item.second);
@@ -761,13 +747,7 @@ export default {
             })
         },
         async getGroups() {
-            var instance = axios.create({
-                headers: {
-                    'sessionId': this.$store.state.session,
-                    'token': this.$store.state.token
-                }
-            })
-            instance.get(this.url + 'group').then((response) => {
+            Http().get(ENDPOINT.GROUP).then((response) => {
                 this.groups = response.data;
                 console.log(this.groups)
             }).catch((error) => {
@@ -775,24 +755,14 @@ export default {
             })
         },
         async getUsers() {
-            var instance = axios.create({
-                headers: {
-                    'sessionId': this.$store.state.session,
-                    'token': this.$store.state.token
-                }
-            })
-            instance.get(this.url + 'user/').then((response) => {
+            Http().get(ENDPOINT.USER).then((response) => {
                 this.users = response.data;
             }).catch((error) => {
                 console.log(error.response);
             })
         },
         deleteTicket() {
-            axios.delete(this.url + 'ticket/deleteTickets', {
-                headers: {
-                    'sessionId': this.$store.state.session,
-                    'token': this.$store.state.token
-                },
+           Http().delete(ENDPOINT.TICKET+'deleteTickets', {
                 data: {
                     'ticketsIds': this.ticketIdsSelected
                 }
@@ -807,11 +777,7 @@ export default {
             });
         },
         permanentlyDeleteTicket() {
-            axios.delete(this.url + 'ticket/deleteTicketsForever', {
-                headers: {
-                    'sessionId': this.$store.state.session,
-                    'token': this.$store.state.token
-                },
+           Http().delete(ENDPOINT.TICKET+ 'deleteTicketsForever', {
                 data: {
                     'ticketsIds': this.ticketIdsSelected
                 }
@@ -824,15 +790,10 @@ export default {
             })
         },
         restoreTicket() {
-            axios.patch(this.url + 'ticket/undeleteTickets',
+            Http().patch(ENDPOINT.TICKET + 'undeleteTickets',
                 {
-                    'ticketsIds': this.ticketIdsSelected
-                }, {
-                headers: {
-                    'sessionId': this.$store.state.session,
-                    'token': this.$store.state.token
-                }
-            }).then(() => {
+                    data:{'ticketsIds': this.ticketIdsSelected}
+                } ).then(() => {
                 this.getRespectiveRowsCount()
                 for (var respectiveColumn of this.respectiveColumns) {
                     this.getRespectiveRows(respectiveColumn.tabType)

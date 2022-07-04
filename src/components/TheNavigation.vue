@@ -127,14 +127,14 @@
 
 <script>
 import Popper from "vue3-popper";
-import axios from 'axios'
 import router from '../router'
 import VueModal from '@kouts/vue-modal';
 import svgMain from  './svgMain.vue'
+import Http,{ENDPOINT} from '../request.js';
+
 export default {
     data() {
         return {
-            url: 'http://localhost:8080/',
             showModalAddGroup: false,
             newGroupName:null,
             newGroupEmail:null,
@@ -173,26 +173,15 @@ export default {
     },
     methods: {
         async signout() {
-            var instance = axios.create({
-                headers: {
-                    'sessionId': this.$store.state.session,
-                    'token': this.$store.state.token
-                }
-            })
-            instance.get(this.url + 'auth/signOut').then(() => {
+           Http().get(ENDPOINT.signout).then(() => {
                 this.$store.commit('signout')
                 router.push({ name: 'Login' })
             })
         },addNewGroup() {
-            axios
-                .post(this.url + 'group/', {
+            Http()
+                .post(ENDPOINT.GROUP, {
                     username: this.newGroupName,
                     email: this.newUserEmail
-                }, {
-                    headers: {
-                        'sessionId': this.$store.state.session,
-                        'token': this.$store.state.token
-                    }
                 })
                 .then(() => {
                     this.newGroupName = '';
@@ -203,16 +192,10 @@ export default {
                     console.log(error.response)
                 })
         },addNewUser() {
-            axios
-                .post(this.url + 'user/', {
+            Http().post(ENDPOINT.USER, {
                     username: this.newUserName,
                     email: this.newUserEmail,
                     category: this.newUserRole
-                }, {
-                    headers: {
-                        'sessionId': this.$store.state.session,
-                        'token': this.$store.state.token
-                    }
                 })
                 .then(() => {
                     this.newUserName = '';

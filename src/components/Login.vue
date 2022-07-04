@@ -25,8 +25,8 @@
 </template>
 
 <script>
-import axios from 'axios'
 import router from '../router'
+import Http,{ENDPOINT} from '../request.js'
 export default {
     name: 'LoginItem',
 
@@ -34,13 +34,11 @@ export default {
         return {
             username: '',
             password: '',
-            url: 'http://localhost:8080/',
         }
     },
     methods: {
         login() {
-            axios
-                .post(this.url + 'auth/login', {
+            Http().post(ENDPOINT.LOGIN, {
                     username: this.username,
                     password: this.password
                 })
